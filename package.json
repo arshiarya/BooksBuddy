@@ -8,7 +8,9 @@
     "dev:client": "npm --prefix client run dev",
     "start:server": "npm --prefix server start",
     "test:server": "npm --prefix server test",
-    "build:client": "npm --prefix client run build"
+    "build:client": "npm --prefix client run build",
+    "db:migrate": "npm --prefix server run migrate",
+    "db:seed": "npm --prefix server run seed"
   },
   "keywords": [
     "booksbuddy",

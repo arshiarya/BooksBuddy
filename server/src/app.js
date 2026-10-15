@@ -24,14 +24,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Phase 1 Health-Check Endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
+const db = require('./config/db');
+
+// Phase 1 & 2 Health-Check Endpoint with Database Probe
+app.get('/health', async (req, res) => {
+  const dbHealth = await db.healthCheck();
+  const isHealthy = dbHealth.ok;
+
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     service: 'booksbuddy-server',
     environment: env.NODE_ENV,
+    database: dbHealth,
   });
 });
 
