@@ -1,0 +1,20 @@
+{
+  "name": "booksbuddy",
+  "version": "1.0.0",
+  "description": "Community-Based Virtual Library Platform",
+  "private": true,
+  "scripts": {
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "start:server": "npm --prefix server start",
+    "test:server": "npm --prefix server test",
+    "build:client": "npm --prefix client run build"
+  },
+  "keywords": [
+    "booksbuddy",
+    "virtual-library",
+    "community"
+  ],
+  "author": "",
+  "license": "ISC"
+}
