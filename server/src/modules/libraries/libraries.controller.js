@@ -44,6 +44,7 @@ async function getById(req, res, next) {
 
 async function create(req, res, next) {
   try {
+    const body = req.body || {};
     const {
       name,
       society_locality,
@@ -53,7 +54,7 @@ async function create(req, res, next) {
       handover_window_hours,
       max_books_per_member,
       max_renewals,
-    } = req.body;
+    } = body;
 
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
       return res.status(400).json({
@@ -142,7 +143,8 @@ async function create(req, res, next) {
 
 async function update(req, res, next) {
   try {
-    const { max_borrow_days, handover_window_hours, max_books_per_member, max_renewals } = req.body;
+    const body = req.body || {};
+    const { max_borrow_days, handover_window_hours, max_books_per_member, max_renewals } = body;
 
     if (max_borrow_days !== undefined && parseInt(max_borrow_days, 10) <= 0) {
       return res.status(400).json({
@@ -168,7 +170,7 @@ async function update(req, res, next) {
       });
     }
 
-    const updated = await librariesService.updateLibrary(req.params.id, req.body);
+    const updated = await librariesService.updateLibrary(req.params.id, body);
     res.status(200).json({
       message: 'Library rules updated successfully.',
       library: updated,
@@ -180,7 +182,7 @@ async function update(req, res, next) {
 
 async function join(req, res, next) {
   try {
-    const inviteCode = req.body.invite_code || req.query.invite_code || '';
+    const inviteCode = req.body?.invite_code || req.query?.invite_code || '';
     const membership = await librariesService.joinLibrary(
       req.params.id,
       req.user.id,
@@ -212,7 +214,8 @@ async function listMembers(req, res, next) {
 
 async function updateMember(req, res, next) {
   try {
-    const { status, role } = req.body;
+    const body = req.body || {};
+    const { status, role } = body;
     if (!status && !role) {
       return res.status(400).json({
         error: {
