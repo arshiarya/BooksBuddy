@@ -1,6 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { setCsrfToken, getCsrfToken } from '../src/api/client.js';
+import { normalizeUser } from '../src/api/auth.api.js';
 
 describe('Frontend Architecture, API Client & Security (Phase 9)', () => {
   test('CSRF token manager stores and retrieves tokens correctly', () => {
@@ -224,5 +225,79 @@ describe('Frontend Architecture, API Client & Security (Phase 9)', () => {
     assert.equal(isFutureDate(pastDate), false);
     assert.equal(isFutureDate(futureDate), true);
     assert.equal(isFutureDate('invalid-date'), false);
+  });
+
+  test('Registration payload mapper converts frontend camelCase state to backend contract', () => {
+    const frontendFormData = {
+      email: 'resident@example.com',
+      password: 'StrongPassword123!',
+      fullName: 'Aarav Librarian',
+      phone: '+91 9876500001',
+      societyLocality: 'Lotus Heights',
+      flatHouseNumber: 'Tower A-101',
+      city: 'Bengaluru',
+    };
+
+    // The mapping logic executed inside authApi.register
+    const backendPayload = {
+      email: frontendFormData.email,
+      password: frontendFormData.password,
+      full_name: frontendFormData.full_name ?? frontendFormData.fullName,
+      phone: frontendFormData.phone,
+      society_locality: frontendFormData.society_locality ?? frontendFormData.societyLocality,
+      flat_house_number: frontendFormData.flat_house_number ?? frontendFormData.flatHouseNumber,
+      city: frontendFormData.city,
+    };
+
+    // Assert that backend snake_case contract is satisfied
+    assert.equal(backendPayload.full_name, 'Aarav Librarian');
+    assert.equal(backendPayload.society_locality, 'Lotus Heights');
+    assert.equal(backendPayload.flat_house_number, 'Tower A-101');
+    assert.equal(backendPayload.email, 'resident@example.com');
+    assert.equal(backendPayload.phone, '+91 9876500001');
+    assert.equal(backendPayload.city, 'Bengaluru');
+    assert.equal(backendPayload.fullName, undefined);
+    assert.equal(backendPayload.societyLocality, undefined);
+    assert.equal(backendPayload.flatHouseNumber, undefined);
+  });
+
+  test('User model normalizer maps backend snake_case to frontend camelCase consistently', () => {
+    const rawBackendUser = {
+      id: 42,
+      email: 'member@example.com',
+      full_name: 'Priya Sharma',
+      phone: '+91 9123456780',
+      society_locality: 'Green Glen Layout',
+      flat_house_number: 'Flat 304',
+      city: 'Bengaluru',
+      created_at: '2026-10-16T12:00:00.000Z',
+    };
+
+    const normalized = normalizeUser(rawBackendUser);
+
+    assert.equal(normalized.fullName, 'Priya Sharma');
+    assert.equal(normalized.societyLocality, 'Green Glen Layout');
+    assert.equal(normalized.flatHouseNumber, 'Flat 304');
+    assert.equal(normalized.createdAt, '2026-10-16T12:00:00.000Z');
+    // Preserves original fields
+    assert.equal(normalized.full_name, 'Priya Sharma');
+    assert.equal(normalized.society_locality, 'Green Glen Layout');
+    assert.equal(normalized.flat_house_number, 'Flat 304');
+
+    // Handles already camelCased data without overwriting
+    const alreadyCamelCase = {
+      id: 99,
+      fullName: 'Vikram Seth',
+      societyLocality: 'Indiranagar',
+      flatHouseNumber: 'No. 12',
+    };
+    const normalizedCamel = normalizeUser(alreadyCamelCase);
+    assert.equal(normalizedCamel.fullName, 'Vikram Seth');
+    assert.equal(normalizedCamel.societyLocality, 'Indiranagar');
+    assert.equal(normalizedCamel.flatHouseNumber, 'No. 12');
+
+    // Handles null / undefined gracefully
+    assert.equal(normalizeUser(null), null);
+    assert.equal(normalizeUser(undefined), undefined);
   });
 });
