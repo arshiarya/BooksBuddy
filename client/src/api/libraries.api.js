@@ -3,7 +3,9 @@ import { apiRequest } from './client';
 export const librariesApi = {
   async search(params = {}) {
     const query = new URLSearchParams();
-    if (params.search) query.set('search', params.search);
+    const searchTerm = params.q ?? params.search;
+    if (searchTerm) query.set('q', searchTerm);
+    if (params.locality) query.set('locality', params.locality);
     if (params.city) query.set('city', params.city);
     if (params.page) query.set('page', params.page);
     if (params.limit) query.set('limit', params.limit);

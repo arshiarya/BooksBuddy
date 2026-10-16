@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { librariesApi } from '../../api/libraries.api';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../common/Button';
@@ -9,6 +9,12 @@ export function InviteCodeCard({ libraryId, initialInviteCode, onCodeRegenerated
   const [inviteCode, setInviteCode] = useState(initialInviteCode || '');
   const [copied, setCopied] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+
+  useEffect(() => {
+    if (initialInviteCode) {
+      setInviteCode(initialInviteCode);
+    }
+  }, [initialInviteCode]);
 
   const handleCopy = () => {
     if (!inviteCode) return;
@@ -26,9 +32,10 @@ export function InviteCodeCard({ libraryId, initialInviteCode, onCodeRegenerated
     setRegenerating(true);
     try {
       const res = await librariesApi.regenerateInviteCode(libraryId);
-      setInviteCode(res.invite_code);
+      const newCode = res.library?.invite_code || res.invite_code;
+      setInviteCode(newCode);
       showToast('New invitation code generated!', 'success');
-      onCodeRegenerated?.(res.invite_code);
+      onCodeRegenerated?.(newCode);
     } catch (err) {
       showToast(err.message || 'Failed to regenerate invite code.', 'error');
     } finally {

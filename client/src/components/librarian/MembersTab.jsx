@@ -126,7 +126,7 @@ export function MembersTab({ libraryId }) {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {members.map((m) => {
-                  const isActingOnSelf = m.user_id === user?.id;
+                  const isActingOnSelf = Number(m.user_id) === Number(user?.id);
                   const isTargetPrimary = m.role === 'PRIMARY_LIBRARIAN';
                   const isBusy = actionLoadingId === m.id;
 

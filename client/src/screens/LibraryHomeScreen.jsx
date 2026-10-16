@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 
 export function LibraryHomeScreen({ libraryId }) {
-  const { user, isMemberOf, isLibrarianOf, getMembership } = useAuth();
+  const { user, isMemberOf, isLibrarianOf, getMembership, refreshUser } = useAuth();
   const { navigate } = useNavigation();
   const { showToast } = useToast();
 
@@ -44,8 +44,27 @@ export function LibraryHomeScreen({ libraryId }) {
   const [library, setLibrary] = useState(null);
   const [loadingLib, setLoadingLib] = useState(true);
 
-  // Active Tab
-  const [activeTab, setActiveTab] = useState('catalogue');
+  // Active Tab: driven by URL hash (supports page reloads cleanly) or default to catalogue
+  const getInitialTab = () => {
+    try {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && ['catalogue', 'demands', 'ledger', 'notices', 'admin'].includes(hash)) {
+        return hash;
+      }
+    } catch {}
+    return 'catalogue';
+  };
+
+  const [activeTab, setActiveTabState] = useState(getInitialTab);
+
+  const setActiveTab = (tabId) => {
+    try {
+      if (window.location.hash !== `#${tabId}`) {
+        window.history.replaceState(null, '', `#${tabId}`);
+      }
+    } catch {}
+    setActiveTabState(tabId);
+  };
 
   // Catalogue State
   const [books, setBooks] = useState([]);
@@ -90,6 +109,9 @@ export function LibraryHomeScreen({ libraryId }) {
 
   useEffect(() => {
     loadLibraryDetails();
+    if (user) {
+      refreshUser();
+    }
   }, [libraryId]);
 
   useEffect(() => {
@@ -151,7 +173,7 @@ export function LibraryHomeScreen({ libraryId }) {
                 </h1>
                 {membership?.status === 'APPROVED' && (
                   <Badge variant="success" size="sm">
-                    {membership.role}
+                    Member ({membership.role})
                   </Badge>
                 )}
               </div>
@@ -364,6 +386,7 @@ export function LibraryHomeScreen({ libraryId }) {
         onClose={() => setShowDonateModal(false)}
         libraryId={libraryId}
         onSuccess={() => {
+          setActiveTab('catalogue');
           loadBooks();
           loadLibraryDetails();
         }}

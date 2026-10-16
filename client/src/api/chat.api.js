@@ -10,10 +10,10 @@ export const chatApi = {
     return apiRequest(`/api/v1/chat/requests/${borrowRequestId}/messages${queryString ? `?${queryString}` : ''}`);
   },
 
-  async postMessage(borrowRequestId, content) {
+  async postMessage(borrowRequestId, text) {
     return apiRequest(`/api/v1/chat/requests/${borrowRequestId}/messages`, {
       method: 'POST',
-      body: { content },
+      body: { message_text: text, content: text },
     });
   },
 };

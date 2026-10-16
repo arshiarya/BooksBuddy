@@ -32,7 +32,13 @@ export function RulesTab({ library, onRulesUpdated }) {
     setSubmitting(true);
 
     try {
-      await librariesApi.updateRules(library.id, rules);
+      const payload = {
+        max_borrow_days: parseInt(rules.max_borrow_days, 10) || 14,
+        handover_window_hours: parseInt(rules.handover_window_hours, 10) || 48,
+        max_books_per_member: parseInt(rules.max_books_per_member, 10) || 3,
+        max_renewals: parseInt(rules.max_renewals, 10) ?? 1,
+      };
+      await librariesApi.updateRules(library.id, payload);
       showToast('Library borrowing rules updated successfully!', 'success');
       onRulesUpdated?.();
     } catch (err) {
@@ -69,17 +75,20 @@ export function RulesTab({ library, onRulesUpdated }) {
               Max Borrow Duration (Days)
             </label>
             <input
-              type="number"
-              min="1"
-              max="90"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               required
               value={rules.max_borrow_days}
-              onChange={(e) =>
-                setRules({ ...rules, max_borrow_days: parseInt(e.target.value, 10) || 1 })
-              }
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                setRules({ ...rules, max_borrow_days: val ? parseInt(val, 10) : '' });
+              }}
               className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
-            <p className="text-[11px] text-slate-400 mt-1">Allowed loan period before due date.</p>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Allowed loan period before due date ({rules.max_borrow_days || 14} days).
+            </p>
           </div>
 
           <div>
@@ -87,18 +96,19 @@ export function RulesTab({ library, onRulesUpdated }) {
               Handover Window (Hours)
             </label>
             <input
-              type="number"
-              min="1"
-              max="168"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               required
               value={rules.handover_window_hours}
-              onChange={(e) =>
-                setRules({ ...rules, handover_window_hours: parseInt(e.target.value, 10) || 1 })
-              }
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                setRules({ ...rules, handover_window_hours: val ? parseInt(val, 10) : '' });
+              }}
               className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
             <p className="text-[11px] text-slate-400 mt-1">
-              Time to meet & verify PIN before handover session expires.
+              Time to meet & verify PIN before handover session expires ({rules.handover_window_hours || 48}h).
             </p>
           </div>
         </div>
@@ -109,14 +119,15 @@ export function RulesTab({ library, onRulesUpdated }) {
               Max Active Books Per Member
             </label>
             <input
-              type="number"
-              min="1"
-              max="20"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               required
               value={rules.max_books_per_member}
-              onChange={(e) =>
-                setRules({ ...rules, max_books_per_member: parseInt(e.target.value, 10) || 1 })
-              }
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                setRules({ ...rules, max_books_per_member: val ? parseInt(val, 10) : '' });
+              }}
               className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
             <p className="text-[11px] text-slate-400 mt-1">Simultaneous active loans per member.</p>
@@ -127,14 +138,15 @@ export function RulesTab({ library, onRulesUpdated }) {
               Max Allowed Renewals
             </label>
             <input
-              type="number"
-              min="0"
-              max="5"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               required
               value={rules.max_renewals}
-              onChange={(e) =>
-                setRules({ ...rules, max_renewals: parseInt(e.target.value, 10) || 0 })
-              }
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                setRules({ ...rules, max_renewals: val ? parseInt(val, 10) : 0 });
+              }}
               className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
             <p className="text-[11px] text-slate-400 mt-1">Permitted loan extensions if no waitlist.</p>

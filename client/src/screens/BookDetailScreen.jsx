@@ -275,11 +275,11 @@ export function BookDetailScreen({ libraryId, bookId }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-600">
               <div>
                 <span className="text-slate-400">Current Custodian: </span>
-                <strong>{isCustodian ? 'You (Current Custodian)' : book.custodian_name || 'Community Member'}</strong>
+                <strong>{isCustodian ? 'You (Current Custodian)' : book.current_custodian_name || book.custodian_name || 'Community Member'}</strong>
               </div>
               <div>
                 <span className="text-slate-400">Pickup Area: </span>
-                <strong>{book.custodian_locality || book.society_locality || 'Neighborhood'}</strong>
+                <strong>{book.current_custodian_locality || book.custodian_locality || book.library_locality || book.society_locality || 'Neighborhood'}</strong>
               </div>
             </div>
             <p className="text-[11px] text-slate-500 italic pt-1">
@@ -288,10 +288,10 @@ export function BookDetailScreen({ libraryId, bookId }) {
           </div>
 
           {/* Donor Attribution */}
-          {book.donor_name && (
+          {(book.original_donor_name || book.donor_name) && (
             <div className="text-xs text-slate-500 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
-              <span>Generously donated to the community by <strong>{book.donor_name}</strong>.</span>
+              <span>Generously donated to the community by <strong>{book.original_donor_name || book.donor_name}</strong>.</span>
             </div>
           )}
 

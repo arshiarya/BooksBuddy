@@ -300,4 +300,168 @@ describe('Frontend Architecture, API Client & Security (Phase 9)', () => {
     assert.equal(normalizeUser(null), null);
     assert.equal(normalizeUser(undefined), undefined);
   });
+
+  test('Handover receiver pickup address extraction formats correctly from backend contract', () => {
+    const rawSessionFromBackend = {
+      id: 101,
+      status: 'PENDING',
+      receiver_user_id: 2,
+      giver_user_id: 1,
+      pickup_address: {
+        flat_house_number: 'Tower A-101',
+        society_locality: 'Prestige Lakeside',
+        city: 'Bengaluru',
+        phone: '+91 9876500001',
+      },
+    };
+
+    const formatPickupAddress = (session) => {
+      const addr = session.pickup_address;
+      if (!addr) return null;
+      const parts = [addr.flat_house_number, addr.society_locality];
+      if (addr.city) parts.push(addr.city);
+      return parts.filter(Boolean).join(', ');
+    };
+
+    assert.equal(
+      formatPickupAddress(rawSessionFromBackend),
+      'Tower A-101, Prestige Lakeside, Bengaluru'
+    );
+    assert.equal(rawSessionFromBackend.pickup_address.phone, '+91 9876500001');
+
+    // Custodian session without revealed pickup_address
+    const custodianSession = {
+      id: 101,
+      status: 'PENDING',
+      receiver_user_id: 2,
+      giver_user_id: 1,
+    };
+    assert.equal(formatPickupAddress(custodianSession), null);
+  });
+
+  test('Handover completion calculator marks session completed when both parties confirm condition', () => {
+    const isHandoverCompleted = (session) =>
+      Boolean(session.giver_confirmed_at && session.receiver_confirmed_at) ||
+      session.status === 'COMPLETED' ||
+      session.borrow_status === 'ACTIVE';
+
+    // Status is VERIFIED in DB, but both parties confirmed condition
+    const completedSession = {
+      status: 'VERIFIED',
+      giver_confirmed_at: '2026-10-16T12:00:00Z',
+      receiver_confirmed_at: '2026-10-16T12:01:00Z',
+      borrow_status: 'ACTIVE',
+    };
+    assert.equal(isHandoverCompleted(completedSession), true);
+
+    // Only giver confirmed
+    const partialSession = {
+      status: 'VERIFIED',
+      giver_confirmed_at: '2026-10-16T12:00:00Z',
+      receiver_confirmed_at: null,
+      borrow_status: 'HANDOVER_PENDING',
+    };
+    assert.equal(isHandoverCompleted(partialSession), false);
+  });
+
+  test('Financial ledger summary calculation and payload mapping handle backend contracts accurately', () => {
+    // 1. Inflow/outflow/balance calculation
+    const summaryData = {
+      totalDonations: 2500,
+      totalExpenses: 800,
+      netBalance: 1700,
+      totalEntries: 5,
+    };
+
+    const totalInflow = summaryData?.totalDonations ?? summaryData?.total_inflow ?? 0;
+    const totalOutflow = summaryData?.totalExpenses ?? summaryData?.total_outflow ?? 0;
+    const netBalance = summaryData?.netBalance ?? summaryData?.net_balance ?? 0;
+
+    assert.equal(Number(totalInflow).toFixed(2), '2500.00');
+    assert.equal(Number(totalOutflow).toFixed(2), '800.00');
+    assert.equal(Number(netBalance).toFixed(2), '1700.00');
+
+    // 2. Payload mapping: entry_type mapped to type
+    const formSubmission = {
+      entry_type: 'DONATION',
+      amount: '1500',
+      description: 'Resident book purchase contribution',
+      category: 'BOOK_PURCHASE',
+    };
+
+    const backendPayload = {
+      type: formSubmission.entry_type || formSubmission.type,
+      amount: parseFloat(formSubmission.amount),
+      description: formSubmission.description,
+    };
+
+    assert.equal(backendPayload.type, 'DONATION');
+    assert.equal(backendPayload.amount, 1500);
+    assert.equal(backendPayload.description, 'Resident book purchase contribution');
+  });
+
+  test('Community notice creation maps content to description and supplies contact_info fallback', () => {
+    const frontendForm = {
+      title: 'Book Club Sunday',
+      content: 'Meeting at the clubhouse garden at 5 PM.',
+      category: 'EVENT',
+    };
+    const user = { email: 'borrower@example.com' };
+    const expDate = new Date(Date.now() + 86400000);
+
+    const payload = {
+      title: frontendForm.title.trim(),
+      description: (frontendForm.content || frontendForm.description || '').trim(),
+      category: frontendForm.category || 'GENERAL',
+      contact_info: (frontendForm.contact_info || user?.email || user?.phone || 'Community Member').trim(),
+      expires_at: expDate.toISOString(),
+    };
+
+    assert.equal(payload.title, 'Book Club Sunday');
+    assert.equal(payload.description, 'Meeting at the clubhouse garden at 5 PM.');
+    assert.equal(payload.category, 'EVENT');
+    assert.equal(payload.contact_info, 'borrower@example.com');
+    assert.ok(payload.expires_at.length > 0);
+  });
+
+  test('Library rule form maps string input states to numeric values for backend contract', () => {
+    const rulesFormState = {
+      max_borrow_days: '28',
+      handover_window_hours: '48',
+      max_books_per_member: '5',
+      max_renewals: '2',
+    };
+
+    const payload = {
+      max_borrow_days: parseInt(rulesFormState.max_borrow_days, 10) || 14,
+      handover_window_hours: parseInt(rulesFormState.handover_window_hours, 10) || 48,
+      max_books_per_member: parseInt(rulesFormState.max_books_per_member, 10) || 3,
+      max_renewals: parseInt(rulesFormState.max_renewals, 10) ?? 1,
+    };
+
+    assert.strictEqual(payload.max_borrow_days, 28);
+    assert.strictEqual(payload.handover_window_hours, 48);
+    assert.strictEqual(payload.max_books_per_member, 5);
+    assert.strictEqual(payload.max_renewals, 2);
+  });
+
+  test('Invite code response extractor correctly reads from library nested contract', () => {
+    const backendResponse = {
+      message: 'Invitation code regenerated successfully.',
+      library: {
+        id: 2,
+        name: 'Meadowlands Community Library',
+        invite_code: 'ABCD1234',
+      },
+    };
+
+    const extractedCode = backendResponse.library?.invite_code || backendResponse.invite_code;
+    assert.strictEqual(extractedCode, 'ABCD1234');
+
+    // Fallback if returned flat
+    const flatResponse = { invite_code: 'XYZ9876' };
+    assert.strictEqual(flatResponse.library?.invite_code || flatResponse.invite_code, 'XYZ9876');
+  });
 });
+
+

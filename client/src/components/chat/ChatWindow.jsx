@@ -47,7 +47,7 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
 
       const handleConnect = () => {
         setIsConnected(true);
-        socket.emit('join_request', { borrowRequestId });
+        socket.emit('join_room', { borrowRequestId });
       };
 
       const handleDisconnect = () => {
@@ -55,7 +55,8 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
       };
 
       const handleReceiveMessage = (msg) => {
-        if (Number(msg.borrow_request_id) === Number(borrowRequestId)) {
+        const reqId = msg.borrowRequestId ?? msg.borrow_request_id;
+        if (Number(reqId) === Number(borrowRequestId)) {
           setMessages((prev) => {
             // Avoid duplicate message appending
             if (prev.some((m) => m.id === msg.id)) return prev;
@@ -75,7 +76,7 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
 
       return () => {
         isMounted = false;
-        socket.emit('leave_request', { borrowRequestId });
+        socket.emit('leave_room', { borrowRequestId });
         socket.off('connect', handleConnect);
         socket.off('disconnect', handleDisconnect);
         socket.off('receive_message', handleReceiveMessage);
@@ -96,8 +97,8 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
 
     if (socket && socket.connected) {
       socket.emit('send_message', {
-        borrowRequestId,
-        content: text,
+        borrowRequestId: Number(borrowRequestId),
+        messageText: text,
       });
       sentViaSocket = true;
     }
@@ -106,8 +107,11 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
     if (!sentViaSocket) {
       try {
         const res = await chatApi.postMessage(borrowRequestId, text);
-        setMessages((prev) => [...prev, res.message]);
-        setTimeout(scrollToBottom, 50);
+        const msg = res.chatMessage || res.message;
+        if (msg) {
+          setMessages((prev) => [...prev, msg]);
+          setTimeout(scrollToBottom, 50);
+        }
       } catch (err) {
         console.error('Failed to send message via REST fallback:', err);
       }
@@ -151,7 +155,11 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
           </div>
         ) : (
           messages.map((msg) => {
-            const isMe = msg.sender_id === user?.id;
+            const senderId = msg.senderId ?? msg.sender_id;
+            const isMe = Number(senderId) === Number(user?.id);
+            const senderName = msg.senderName || msg.sender_name || (isMe ? 'You' : recipientName || 'Member');
+            const contentText = msg.messageText || msg.message_text || msg.content;
+            const timeStr = msg.createdAt || msg.created_at;
             return (
               <div
                 key={msg.id}
@@ -159,13 +167,13 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
               >
                 <div className="flex items-center gap-1.5 mb-1 px-1">
                   <span className="text-[10px] font-semibold text-slate-500">
-                    {isMe ? 'You' : msg.sender_name}
+                    {isMe ? 'You' : senderName}
                   </span>
                   <span className="text-[9px] text-slate-400">
-                    {new Date(msg.created_at).toLocaleTimeString([], {
+                    {timeStr ? new Date(timeStr).toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
-                    })}
+                    }) : ''}
                   </span>
                 </div>
 
@@ -176,7 +184,7 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
                       : 'bg-white text-slate-800 border border-slate-200 rounded-bl-xs'
                   }`}
                 >
-                  {msg.content}
+                  {contentText}
                 </div>
               </div>
             );

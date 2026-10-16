@@ -35,6 +35,10 @@ export function HandoverScreen({ sessionId }) {
     try {
       const res = await borrowingApi.getHandover(sessionId);
       setSession(res.handoverSession);
+      const socket = getSocket();
+      if (socket && res.handoverSession?.borrow_request_id) {
+        socket.emit('join_room', { borrowRequestId: res.handoverSession.borrow_request_id });
+      }
     } catch (err) {
       showToast(err.message || 'Failed to load handover session.', 'error');
     } finally {
@@ -49,7 +53,7 @@ export function HandoverScreen({ sessionId }) {
     const socket = getSocket();
     if (socket) {
       const handleStatusChange = (data) => {
-        showToast(`Handover updated: ${data.status}`, 'info');
+        showToast(`Handover updated: ${data.status || data.eventType}`, 'info');
         loadSession();
       };
 
@@ -76,9 +80,18 @@ export function HandoverScreen({ sessionId }) {
     );
   }
 
-  const isGiver = session.giver_user_id === user?.id;
-  const isReceiver = session.receiver_user_id === user?.id;
-  const isCompleted = session.status === 'COMPLETED';
+  const isGiver = Number(session.giver_user_id) === Number(user?.id);
+  const isReceiver = Number(session.receiver_user_id) === Number(user?.id);
+  const isCompleted =
+    Boolean(session.giver_confirmed_at && session.receiver_confirmed_at) ||
+    session.status === 'COMPLETED' ||
+    session.borrow_status === 'ACTIVE';
+
+  let localPin = null;
+  try {
+    localPin = isGiver ? sessionStorage.getItem(`bb_handover_pin_${session.id}`) : null;
+  } catch (e) {}
+  const displayPin = session.pin || localPin;
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-6">
@@ -102,7 +115,7 @@ export function HandoverScreen({ sessionId }) {
                   Handover Verification
                 </h1>
                 <Badge variant={isCompleted ? 'success' : 'info'} size="sm">
-                  {session.status}
+                  {isCompleted ? 'COMPLETED' : session.status}
                 </Badge>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -136,7 +149,7 @@ export function HandoverScreen({ sessionId }) {
         )}
 
         {/* Authorized Address Reveal (Shown to borrower during active handover) */}
-        {isReceiver && session.giver_address && (
+        {isReceiver && (session.pickup_address || session.giver_address) && (
           <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-sky-900 space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-sky-800">
               <ShieldCheck className="w-4 h-4 text-sky-600 shrink-0" />
@@ -146,13 +159,19 @@ export function HandoverScreen({ sessionId }) {
               <div>
                 <span className="text-sky-700 font-medium">Pickup Location: </span>
                 <strong className="text-slate-900">
-                  {session.giver_address}, {session.giver_locality}, {session.giver_city}
+                  {session.pickup_address?.flat_house_number || session.giver_address},{' '}
+                  {session.pickup_address?.society_locality || session.giver_locality}
+                  {(session.pickup_address?.city || session.giver_city)
+                    ? `, ${session.pickup_address?.city || session.giver_city}`
+                    : ''}
                 </strong>
               </div>
-              {session.giver_phone && (
+              {(session.pickup_address?.phone || session.giver_phone) && (
                 <div>
                   <span className="text-sky-700 font-medium">Custodian Phone: </span>
-                  <strong className="text-slate-900 font-mono">{session.giver_phone}</strong>
+                  <strong className="text-slate-900 font-mono">
+                    {session.pickup_address?.phone || session.giver_phone}
+                  </strong>
                 </div>
               )}
             </div>
@@ -178,7 +197,7 @@ export function HandoverScreen({ sessionId }) {
       <div className="space-y-6">
         {/* Step 1: 4-Digit Security PIN */}
         {isGiver ? (
-          <PinDisplay pin={session.pin} verifiedAt={session.verified_at} />
+          <PinDisplay pin={displayPin} verifiedAt={session.verified_at} />
         ) : isReceiver ? (
           <PinEntry
             sessionId={session.id}

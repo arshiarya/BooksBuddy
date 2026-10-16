@@ -17,9 +17,15 @@ export const borrowingApi = {
   },
 
   async approveRequest(requestId) {
-    return apiRequest(`/api/v1/borrowing/requests/${requestId}/approve`, {
+    const res = await apiRequest(`/api/v1/borrowing/requests/${requestId}/approve`, {
       method: 'POST',
     });
+    if (res?.handoverSession?.id && res?.handoverSession?.pin) {
+      try {
+        sessionStorage.setItem(`bb_handover_pin_${res.handoverSession.id}`, res.handoverSession.pin);
+      } catch (e) {}
+    }
+    return res;
   },
 
   async declineRequest(requestId) {

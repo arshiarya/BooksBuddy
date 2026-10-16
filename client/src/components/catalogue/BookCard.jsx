@@ -78,7 +78,7 @@ export function BookCard({ book, onClick }) {
         <div className="flex items-center gap-1.5 truncate">
           <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           <span className="truncate">
-            {book.custodian_locality || book.society_locality || 'Community Hub'}
+            {book.current_custodian_locality || book.custodian_locality || book.library_locality || book.society_locality || 'Community Hub'}
           </span>
         </div>
       </div>

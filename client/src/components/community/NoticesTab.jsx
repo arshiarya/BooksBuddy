@@ -24,6 +24,7 @@ export function NoticesTab({ libraryId }) {
     content: '',
     category: 'GENERAL',
     priority: 'NORMAL',
+    contact_info: user?.email || user?.phone || 'Community Member',
     expires_at: tomorrowStr,
   });
   const [submitting, setSubmitting] = useState(false);
@@ -59,7 +60,10 @@ export function NoticesTab({ libraryId }) {
     setSubmitting(true);
     try {
       await communityApi.createNotice(libraryId, {
-        ...formData,
+        title: formData.title.trim(),
+        description: (formData.content || formData.description || '').trim(),
+        category: formData.category || 'GENERAL',
+        contact_info: (formData.contact_info || user?.email || user?.phone || 'Community Member').trim(),
         expires_at: expDate.toISOString(),
       });
       showToast('Community notice published!', 'success');
@@ -68,6 +72,7 @@ export function NoticesTab({ libraryId }) {
         content: '',
         category: 'GENERAL',
         priority: 'NORMAL',
+        contact_info: user?.email || user?.phone || 'Community Member',
         expires_at: tomorrowStr,
       });
       setShowCreateModal(false);
@@ -144,7 +149,7 @@ export function NoticesTab({ libraryId }) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {notices.map((notice) => {
-            const isAuthor = notice.author_id === user?.id;
+            const isAuthor = Number(notice.author_id) === Number(user?.id);
             const canDelete = isAuthor || isLibrarian;
 
             return (
@@ -163,7 +168,7 @@ export function NoticesTab({ libraryId }) {
                   </div>
 
                   <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">
-                    {notice.content}
+                    {notice.description || notice.content}
                   </p>
                 </div>
 
@@ -261,6 +266,19 @@ export function NoticesTab({ libraryId }) {
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   placeholder="Write details for your community..."
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Contact Information (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={formData.contact_info}
+                  onChange={(e) => setFormData({ ...formData, contact_info: e.target.value })}
+                  placeholder="e.g. Email, phone, or flat number"
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>

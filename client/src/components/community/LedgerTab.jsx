@@ -55,8 +55,10 @@ export function LedgerTab({ libraryId }) {
     setSubmitting(true);
     try {
       await communityApi.createLedgerEntry(libraryId, {
-        ...formData,
+        type: formData.entry_type || formData.type,
         amount: amt,
+        description: formData.description,
+        user_id: formData.user_id || undefined,
       });
       showToast('Ledger entry recorded successfully!', 'success');
       setFormData({
@@ -74,6 +76,10 @@ export function LedgerTab({ libraryId }) {
       setSubmitting(false);
     }
   };
+
+  const totalInflow = ledgerData?.summary?.totalDonations ?? ledgerData?.summary?.total_donations ?? ledgerData?.summary?.total_inflow ?? 0;
+  const totalOutflow = ledgerData?.summary?.totalExpenses ?? ledgerData?.summary?.total_expenses ?? ledgerData?.summary?.total_outflow ?? 0;
+  const netBalance = ledgerData?.summary?.netBalance ?? ledgerData?.summary?.net_balance ?? 0;
 
   return (
     <div className="space-y-6">
@@ -100,11 +106,11 @@ export function LedgerTab({ libraryId }) {
             <TrendingUp className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <p className="text-xs font-semibold text-slate-500 tracking-wider">
               Total Inflow
             </p>
             <p className="text-xl font-bold text-slate-900 mt-0.5">
-              ₹{ledgerData?.summary?.total_inflow || '0.00'}
+              ₹{Number(totalInflow).toFixed(2)}
             </p>
           </div>
         </div>
@@ -114,11 +120,11 @@ export function LedgerTab({ libraryId }) {
             <TrendingDown className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <p className="text-xs font-semibold text-slate-500 tracking-wider">
               Total Outflow
             </p>
             <p className="text-xl font-bold text-slate-900 mt-0.5">
-              ₹{ledgerData?.summary?.total_outflow || '0.00'}
+              ₹{Number(totalOutflow).toFixed(2)}
             </p>
           </div>
         </div>
@@ -128,11 +134,11 @@ export function LedgerTab({ libraryId }) {
             <Wallet className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <p className="text-xs font-semibold text-slate-500 tracking-wider">
               Net Balance
             </p>
             <p className="text-xl font-bold text-brand-700 mt-0.5">
-              ₹{ledgerData?.summary?.net_balance || '0.00'}
+              ₹{Number(netBalance).toFixed(2)}
             </p>
           </div>
         </div>
@@ -184,19 +190,21 @@ export function LedgerTab({ libraryId }) {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {ledgerData.entries.map((entry) => {
-                  const isDonation = entry.entry_type === 'DONATION';
+                  const entryType = entry.type || entry.entry_type || 'DONATION';
+                  const isDonation = entryType === 'DONATION';
+                  const dateStr = entry.recorded_at || entry.created_at || Date.now();
                   return (
                     <tr key={entry.id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap text-slate-500">
-                        {new Date(entry.created_at).toLocaleDateString()}
+                        {new Date(dateStr).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <Badge variant={isDonation ? 'success' : 'danger'} size="sm">
-                          {entry.entry_type}
+                          {entryType}
                         </Badge>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap font-medium text-slate-800">
-                        {entry.category}
+                        {entry.category || 'GENERAL'}
                       </td>
                       <td className="px-4 py-3 text-slate-700 max-w-xs truncate">
                         {entry.description}

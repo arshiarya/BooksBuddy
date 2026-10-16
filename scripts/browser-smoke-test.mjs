@@ -31,6 +31,23 @@ function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function clickButtonByText(page, text) {
+  await page.waitForFunction(
+    (t) => Array.from(document.querySelectorAll('button')).some((b) => b.innerText.includes(t)),
+    { timeout: 10000 },
+    text
+  );
+  const clicked = await page.evaluate((t) => {
+    const btn = Array.from(document.querySelectorAll('button')).find((b) => b.innerText.includes(t));
+    if (btn) {
+      btn.click();
+      return true;
+    }
+    return false;
+  }, text);
+  if (!clicked) throw new Error(`Could not click button containing "${text}"`);
+}
+
 async function pingUrl(url, timeout = 30000) {
   const start = Date.now();
   while (Date.now() - start < timeout) {
@@ -55,6 +72,7 @@ async function runSmokeTests() {
   let serverProc = null;
   let clientProc = null;
   let browser = null;
+  const passedJourneys = [];
 
   try {
     // 1. Check if backend is already running, else spawn it
@@ -123,7 +141,6 @@ async function runSmokeTests() {
     const userBEmail = `bhavna_borrow_${timestamp}@example.com`;
     const password = 'StrongPassword123!';
 
-    const passedJourneys = [];
     const recordPassed = (num, name) => {
       console.log(`\n✔ Journey ${num} PASSED: ${name}`);
       passedJourneys.push({ num, name });
@@ -153,9 +170,6 @@ async function runSmokeTests() {
       throw new Error('User A was not registered/logged in properly.');
     }
     recordPassed(1, 'Register (User A)');
-
-    console.log('\n[INFO] Halting smoke test after Journey 1 per instruction.');
-    return;
 
     // ─── Journey 2: Login / Logout ───────────────────────────
     console.log('\n[TEST 2] Testing Logout and Login for User A...');
@@ -253,7 +267,7 @@ async function runSmokeTests() {
 
     // User B discovers library and requests to join
     await pageB.goto(`${FRONTEND_URL}/`, { waitUntil: 'networkidle0' });
-    const joinBtn = await pageB.waitForSelector(`div:has-text("${libName}") button, button:has-text("Request to Join")`);
+    await pageB.waitForSelector('.group');
     // Find the button for this specific library
     const clickedJoin = await pageB.evaluate((name) => {
       const cards = Array.from(document.querySelectorAll('.group'));
@@ -273,8 +287,7 @@ async function runSmokeTests() {
     await wait(600);
 
     // Submit join application modal
-    const submitAppBtn = await pageB.waitForSelector('button:has-text("Submit Application")');
-    await submitAppBtn.click();
+    await clickButtonByText(pageB, 'Submit Application');
     await wait(1000);
 
     // Verify User B sees "Awaiting Approval"
@@ -294,8 +307,7 @@ async function runSmokeTests() {
     // ─── Journey 6: Librarian Approve Membership (User A) ────
     console.log('\n[TEST 6] Librarian approving User B membership...');
     await pageA.goto(`${FRONTEND_URL}/library/${libraryId}`, { waitUntil: 'networkidle0' });
-    const adminTab = await pageA.waitForSelector('button:has-text("Librarian Dashboard")');
-    await adminTab.click();
+    await clickButtonByText(pageA, 'Librarian Dashboard');
     await wait(1000);
 
     // Find Approve button for Bhavna Borrower
@@ -358,8 +370,7 @@ async function runSmokeTests() {
     // ─── Journey 9: Donate a Book (User A) ────────────────────
     console.log('\n[TEST 9] User A donating book to the library...');
     await pageA.goto(`${FRONTEND_URL}/library/${libraryId}`, { waitUntil: 'networkidle0' });
-    const donateBtn = await pageA.waitForSelector('button:has-text("Donate a Book")');
-    await donateBtn.click();
+    await clickButtonByText(pageA, 'Donate a Book');
     await wait(600);
 
     const bookTitle = `The Pragmatic Programmer ${timestamp}`;
@@ -369,8 +380,7 @@ async function runSmokeTests() {
     await pageA.type('input[placeholder="e.g. Fiction, Tech"]', 'Computer Science');
     await pageA.type('textarea[placeholder*="Brief description"]', 'Classic practical programming guide.');
 
-    const submitDonationBtn = await pageA.waitForSelector('button:has-text("Donate Book")');
-    await submitDonationBtn.click();
+    await clickButtonByText(pageA, 'Donate Book');
     await wait(1500);
 
     // Verify book is rendered in catalogue
@@ -419,8 +429,7 @@ async function runSmokeTests() {
 
     // ─── Journey 11: Request an Available Book (User B) ───────
     console.log('\n[TEST 11] User B requesting to borrow available book...');
-    const borrowBtn = await pageB.waitForSelector('button:has-text("Request to Borrow Book")');
-    await borrowBtn.click();
+    await clickButtonByText(pageB, 'Request to Borrow Book');
     await wait(1500);
 
     const requestStatusText = await pageB.$eval('main', (el) => el.innerText);
@@ -434,8 +443,7 @@ async function runSmokeTests() {
     await pageA.goto(`${FRONTEND_URL}/library/${libraryId}/book/${bookId}`, { waitUntil: 'networkidle0' });
     await wait(1000);
 
-    const approveBtn = await pageA.waitForSelector('button:has-text("Approve Handover")');
-    await approveBtn.click();
+    await clickButtonByText(pageA, 'Approve Handover');
     await wait(1500);
 
     // Refresh User A and verify handover button appears
@@ -452,8 +460,7 @@ async function runSmokeTests() {
     await pageB.goto(`${FRONTEND_URL}/my-books`, { waitUntil: 'networkidle0' });
     await wait(1000);
 
-    const verifyHandoverBtn = await pageB.waitForSelector('button:has-text("Verify Handover")');
-    await verifyHandoverBtn.click();
+    await clickButtonByText(pageB, 'Verify Handover');
     await wait(1000);
 
     const handoverUrl = pageB.url();
@@ -472,7 +479,8 @@ async function runSmokeTests() {
     await pageA.goto(`${FRONTEND_URL}/handover/${sessionId}`, { waitUntil: 'networkidle0' });
     await wait(1000);
     const giverHandoverText = await pageA.$eval('main', (el) => el.innerText);
-    if (!giverHandoverText.includes('Handover Security PIN')) {
+    if (!giverHandoverText.toUpperCase().includes('HANDOVER SECURITY PIN')) {
+      console.error('[DIAGNOSTIC TEST 13 GIVER TEXT]:\n', giverHandoverText);
       throw new Error('Custodian was not shown Handover Security PIN.');
     }
     recordPassed(13, 'Handover screen (Address revealed strictly to authorized borrower)');
@@ -490,12 +498,11 @@ async function runSmokeTests() {
     // User B enters PIN
     const pinInput = await pageB.waitForSelector('input[placeholder="0000"]');
     await pinInput.type(pin);
-    const verifyPinBtn = await pageB.waitForSelector('button:has-text("Verify PIN")');
-    await verifyPinBtn.click();
+    await clickButtonByText(pageB, 'Verify PIN');
     await wait(1500);
 
     const pinVerifiedText = await pageB.$eval('main', (el) => el.innerText);
-    if (!pinVerifiedText.includes('PIN Verified')) {
+    if (!pinVerifiedText.toUpperCase().includes('PIN VERIFIED')) {
       throw new Error('PIN verification was not acknowledged on receiver screen.');
     }
     recordPassed(14, 'PIN verification');
@@ -503,20 +510,19 @@ async function runSmokeTests() {
     // ─── Journey 15: Both-Side Condition Confirmation ─────────
     console.log('\n[TEST 15] Confirming condition on both sides...');
     // User A (giver) confirms condition
-    const giverConfirmBtn = await pageA.waitForSelector('button:has-text("Confirm Condition")');
-    await giverConfirmBtn.click();
+    await clickButtonByText(pageA, 'Confirm Condition');
     await wait(1500);
 
     // User B (receiver) confirms condition
-    const receiverConfirmBtn = await pageB.waitForSelector('button:has-text("Confirm Condition")');
-    await receiverConfirmBtn.click();
+    await clickButtonByText(pageB, 'Confirm Condition');
     await wait(2000);
 
     // Refresh both pages
     await pageB.reload({ waitUntil: 'networkidle0' });
     await wait(1000);
     const completionText = await pageB.$eval('main', (el) => el.innerText);
-    if (!completionText.includes('Handover & Custody Transfer Complete') && !completionText.includes('COMPLETED')) {
+    if (!completionText.toUpperCase().includes('HANDOVER & CUSTODY TRANSFER COMPLETE') && !completionText.toUpperCase().includes('COMPLETED')) {
+      console.error('[DIAGNOSTIC TEST 15 COMPLETION TEXT]:\n', completionText);
       throw new Error('Handover status did not reach COMPLETED after both condition confirmations.');
     }
     recordPassed(15, 'Both-side condition confirmation (Atomic custody transfer)');
@@ -527,7 +533,7 @@ async function runSmokeTests() {
     await wait(1000);
 
     const myBooksBText = await pageB.$eval('main', (el) => el.innerText);
-    if (!myBooksBText.includes(bookTitle) || !myBooksBText.includes('Active Loan')) {
+    if (!myBooksBText.includes(bookTitle) || !myBooksBText.toUpperCase().includes('ACTIVE LOAN')) {
       throw new Error('Active loan was not listed on borrower My Books dashboard.');
     }
     recordPassed(16, 'My Books dashboard');
@@ -535,8 +541,7 @@ async function runSmokeTests() {
     // ─── Journey 17: Real-Time Chat Coordination ──────────────
     console.log('\n[TEST 17] Testing real-time Socket.IO chat...');
     // Find borrow request ID from the chat button
-    const chatBtn = await pageB.waitForSelector('button:has-text("Chat")');
-    await chatBtn.click();
+    await clickButtonByText(pageB, 'Chat');
     await wait(1000);
 
     const chatUrl = pageB.url();
@@ -552,8 +557,7 @@ async function runSmokeTests() {
     const chatInputB = await pageB.waitForSelector('input[placeholder*="Type a message"]');
     const msgText = `Hello Aarav! Handover went great. Time: ${timestamp}`;
     await chatInputB.type(msgText);
-    const sendBtnB = await pageB.waitForSelector('button:has-text("Send")');
-    await sendBtnB.click();
+    await clickButtonByText(pageB, 'Send');
     await wait(1500);
 
     // Verify User A receives message
@@ -567,12 +571,10 @@ async function runSmokeTests() {
     console.log('\n[TEST 18] Testing book demands wishlist and voting...');
     await pageB.goto(`${FRONTEND_URL}/library/${libraryId}`, { waitUntil: 'networkidle0' });
     await wait(800);
-    const demandsTab = await pageB.waitForSelector('button:has-text("Wishlist & Demands")');
-    await demandsTab.click();
+    await clickButtonByText(pageB, 'Wishlist & Demands');
     await wait(1000);
 
-    const wishBtn = await pageB.waitForSelector('button:has-text("Wish for a Book")');
-    await wishBtn.click();
+    await clickButtonByText(pageB, 'Wish for a Book');
     await wait(600);
 
     const demandTitle = `Designing Data-Intensive Applications ${timestamp}`;
@@ -580,8 +582,7 @@ async function runSmokeTests() {
     await pageB.type('input[placeholder="e.g. Yuval Noah Harari"]', 'Martin Kleppmann');
     await pageB.type('textarea[placeholder*="Tell your neighbors"]', 'Essential book on distributed storage!');
 
-    const postWishBtn = await pageB.waitForSelector('button:has-text("Post Book Wish")');
-    await postWishBtn.click();
+    await clickButtonByText(pageB, 'Post Book Wish');
     await wait(1500);
 
     // Verify demand rendered with 1 Upvote
@@ -591,8 +592,7 @@ async function runSmokeTests() {
     }
 
     // Toggle vote off
-    const voteBtn = await pageB.waitForSelector(`button:has-text("1 Upvotes")`);
-    await voteBtn.click();
+    await clickButtonByText(pageB, '1 Upvotes');
     await wait(1000);
     demandsText = await pageB.$eval('main', (el) => el.innerText);
     if (!demandsText.includes('0 Upvotes')) {
@@ -600,8 +600,7 @@ async function runSmokeTests() {
     }
 
     // Toggle vote back on
-    const voteBtnOff = await pageB.waitForSelector(`button:has-text("0 Upvotes")`);
-    await voteBtnOff.click();
+    await clickButtonByText(pageB, '0 Upvotes');
     await wait(1000);
     demandsText = await pageB.$eval('main', (el) => el.innerText);
     if (!demandsText.includes('1 Upvotes')) {
@@ -611,8 +610,7 @@ async function runSmokeTests() {
 
     // ─── Journey 19: Ledger Viewing & Recording ───────────────
     console.log('\n[TEST 19] Testing transparent financial ledger...');
-    const ledgerTab = await pageB.waitForSelector('button:has-text("Financial Ledger")');
-    await ledgerTab.click();
+    await clickButtonByText(pageB, 'Financial Ledger');
     await wait(1000);
 
     const ledgerTextB = await pageB.$eval('main', (el) => el.innerText);
@@ -623,19 +621,16 @@ async function runSmokeTests() {
     // User A records an entry
     await pageA.goto(`${FRONTEND_URL}/library/${libraryId}`, { waitUntil: 'networkidle0' });
     await wait(800);
-    const ledgerTabA = await pageA.waitForSelector('button:has-text("Financial Ledger")');
-    await ledgerTabA.click();
+    await clickButtonByText(pageA, 'Financial Ledger');
     await wait(1000);
 
-    const recordEntryBtn = await pageA.waitForSelector('button:has-text("Record Entry")');
-    await recordEntryBtn.click();
+    await clickButtonByText(pageA, 'Record Entry');
     await wait(600);
 
     await pageA.type('input[placeholder="e.g. 500"]', '1500');
     await pageA.type('input[placeholder*="Purchased 3 copies"]', 'Resident book purchase contribution');
 
-    const submitEntryBtn = await pageA.waitForSelector('button:has-text("Record Transaction")');
-    await submitEntryBtn.click();
+    await clickButtonByText(pageA, 'Record Transaction');
     await wait(1500);
 
     const ledgerTextA = await pageA.$eval('main', (el) => el.innerText);
@@ -646,20 +641,17 @@ async function runSmokeTests() {
 
     // ─── Journey 20: Notice Creation & Deletion ───────────────
     console.log('\n[TEST 20] Testing Community Notice board creation & deletion...');
-    const noticesTab = await pageB.waitForSelector('button:has-text("Notice Board")');
-    await noticesTab.click();
+    await clickButtonByText(pageB, 'Notice Board');
     await wait(1000);
 
-    const postNoticeBtn = await pageB.waitForSelector('button:has-text("Post Notice")');
-    await postNoticeBtn.click();
+    await clickButtonByText(pageB, 'Post Notice');
     await wait(600);
 
     const noticeTitle = `Book Club Sunday ${timestamp}`;
     await pageB.type('input[placeholder*="Weekend Book Swap"]', noticeTitle);
     await pageB.type('textarea[placeholder*="Write details"]', 'Meeting at the clubhouse garden at 5 PM.');
 
-    const publishNoticeBtn = await pageB.waitForSelector('button:has-text("Publish Notice")');
-    await publishNoticeBtn.click();
+    await clickButtonByText(pageB, 'Publish Notice');
     await wait(1500);
 
     let noticesText = await pageB.$eval('main', (el) => el.innerText);
@@ -685,8 +677,7 @@ async function runSmokeTests() {
     console.log('\n[TEST 21] Librarian member management...');
     await pageA.goto(`${FRONTEND_URL}/library/${libraryId}`, { waitUntil: 'networkidle0' });
     await wait(800);
-    const libAdminTab = await pageA.waitForSelector('button:has-text("Librarian Dashboard")');
-    await libAdminTab.click();
+    await clickButtonByText(pageA, 'Librarian Dashboard');
     await wait(1000);
 
     // Appoint User B as co-librarian
@@ -721,8 +712,7 @@ async function runSmokeTests() {
     await borrowDaysInput.click({ clickCount: 3 });
     await pageA.keyboard.type('28');
 
-    const saveRulesBtn = await pageA.waitForSelector('button:has-text("Save Library Rules")');
-    await saveRulesBtn.click();
+    await clickButtonByText(pageA, 'Save Library Rules');
     await wait(1500);
 
     // Reload and verify 28 persists
@@ -795,8 +785,15 @@ async function runSmokeTests() {
     console.log('\n=====================================================');
     console.log(`🎉 ALL 25 USER JOURNEYS PASSED CLEANLY IN THE BROWSER!`);
     console.log('=====================================================');
+    passedJourneys.forEach((j) => {
+      console.log(`  ✔ Journey ${j.num}: ${j.name}`);
+    });
   } catch (err) {
     console.error('\n❌ BROWSER SMOKE TEST FAILED:', err);
+    console.log('\nJourneys passed prior to failure:');
+    passedJourneys.forEach((j) => {
+      console.log(`  ✔ Journey ${j.num}: ${j.name}`);
+    });
     process.exitCode = 1;
   } finally {
     if (browser) {
