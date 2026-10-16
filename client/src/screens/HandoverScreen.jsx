@@ -89,7 +89,11 @@ export function HandoverScreen({ sessionId }) {
 
   let localPin = null;
   try {
-    localPin = isGiver ? sessionStorage.getItem(`bb_handover_pin_${session.id}`) : null;
+    if (isCompleted) {
+      sessionStorage.removeItem(`bb_handover_pin_${session.id}`);
+    } else {
+      localPin = isGiver ? sessionStorage.getItem(`bb_handover_pin_${session.id}`) : null;
+    }
   } catch (e) {}
   const displayPin = session.pin || localPin;
 

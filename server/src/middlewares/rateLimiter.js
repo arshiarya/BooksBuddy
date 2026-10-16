@@ -25,7 +25,7 @@ function createRateLimiter({
     cleanupInterval.unref();
   }
 
-  return (req, res, next) => {
+  const middleware = (req, res, next) => {
     // In test environment, allow bypassing rate limiting if header is set or configured
     if (process.env.NODE_ENV === 'test' && req.headers['x-bypass-rate-limit']) {
       return next();
@@ -64,6 +64,29 @@ function createRateLimiter({
   return middleware;
 }
 
+// Pre-configured limiters for critical application domains
+const pinLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  maxRequests: 15,
+  message: 'Too many PIN verification attempts. Please try again later.',
+});
+
+const searchLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 120,
+  message: 'Search rate limit exceeded. Please slow down your requests.',
+});
+
+const borrowLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  maxRequests: 60,
+  message: 'Too many borrow requests. Please try again later.',
+});
+
 module.exports = {
   createRateLimiter,
+  pinLimiter,
+  searchLimiter,
+  borrowLimiter,
 };
+

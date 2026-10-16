@@ -19,9 +19,9 @@ app.use(
   })
 );
 
-// Body and cookie parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body and cookie parsing with payload size limits
+app.use(express.json({ limit: '200kb' }));
+app.use(express.urlencoded({ extended: true, limit: '200kb' }));
 app.use(cookieParser());
 
 const { authenticate } = require('./middlewares/authenticate');
@@ -83,13 +83,33 @@ app.use((req, res, next) => {
 
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
+  let statusCode = err.statusCode || 500;
+  let message = err.message || 'Internal Server Error';
+
+  // Sanitize PostgreSQL internal errors to prevent schema/column leakage
+  if (err.code) {
+    if (err.code === '23505') {
+      statusCode = 409;
+      message = 'A conflicting record already exists.';
+    } else if (err.code === '23503') {
+      statusCode = 400;
+      message = 'Referenced resource does not exist.';
+    } else if (err.code === '22P02') {
+      statusCode = 400;
+      message = 'Invalid parameter or identifier format.';
+    }
+  }
+
   if (statusCode >= 500) {
     console.error('[SERVER ERROR]', err);
+    if (env.NODE_ENV === 'production') {
+      message = 'Internal Server Error';
+    }
   }
+
   res.status(statusCode).json({
     error: {
-      message: err.message || 'Internal Server Error',
+      message,
       statusCode,
       ...(env.NODE_ENV === 'development' && statusCode >= 500 ? { stack: err.stack } : {}),
     },

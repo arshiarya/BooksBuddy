@@ -2,11 +2,12 @@ const express = require('express');
 const borrowingController = require('./borrowing.controller');
 const { requireAuth } = require('../../middlewares/authenticate');
 const { verifyCsrf } = require('../../middlewares/csrf');
+const { pinLimiter, borrowLimiter } = require('../../middlewares/rateLimiter');
 
 const router = express.Router();
 
 /**
- * Phase 6: Borrowing, Handover & Custody Routes.
+ * Phase 6 & Phase 10: Borrowing, Handover & Custody Routes with Rate Limiting.
  *
  * All routes require authentication. State-changing operations require CSRF verification.
  */
@@ -17,7 +18,7 @@ const router = express.Router();
 router.get('/my-requests', requireAuth, borrowingController.getMyRequests);
 
 // Create a borrow request (or join the FIFO queue)
-router.post('/requests', requireAuth, verifyCsrf, borrowingController.createRequest);
+router.post('/requests', requireAuth, borrowLimiter, verifyCsrf, borrowingController.createRequest);
 
 // Get a specific borrow request by ID
 router.get('/requests/:requestId', requireAuth, borrowingController.getRequest);
@@ -39,8 +40,8 @@ router.post('/requests/:requestId/cancel', requireAuth, verifyCsrf, borrowingCon
 // Get handover session details (with address privacy gate)
 router.get('/handovers/:sessionId', requireAuth, borrowingController.getHandover);
 
-// Verify the one-time handover PIN
-router.post('/handovers/:sessionId/verify-pin', requireAuth, verifyCsrf, borrowingController.verifyHandoverPin);
+// Verify the one-time handover PIN (rate-limited for brute-force protection)
+router.post('/handovers/:sessionId/verify-pin', requireAuth, pinLimiter, verifyCsrf, borrowingController.verifyHandoverPin);
 
 // Confirm book condition (giver or receiver)
 router.post('/handovers/:sessionId/confirm-condition', requireAuth, verifyCsrf, borrowingController.confirmCondition);

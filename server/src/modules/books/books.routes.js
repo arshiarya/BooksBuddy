@@ -40,11 +40,13 @@ async function requireBookLibrarian(req, res, next) {
   }
 }
 
+const { searchLimiter } = require('../../middlewares/rateLimiter');
+
 // 1. External metadata lookup via Open Library
-router.get('/metadata/search', booksController.searchMetadata);
+router.get('/metadata/search', searchLimiter, booksController.searchMetadata);
 
 // 2. Catalogue search & details
-router.get('/', booksController.search);
+router.get('/', searchLimiter, booksController.search);
 router.get('/:id', booksController.getById);
 
 // 3. Donate book (Authenticated library member)

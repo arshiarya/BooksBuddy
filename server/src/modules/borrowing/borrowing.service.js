@@ -422,7 +422,43 @@ async function approveBorrowRequest(requestId, custodianUserId) {
   try {
     await client.query('BEGIN');
 
-    // Lock book via borrow_request
+    // 0. Initial non-locking snapshot check to find book_id
+    const brCheck = await client.query(
+      `SELECT br.id, br.book_id, br.borrower_id, br.status
+       FROM borrow_requests br
+       WHERE br.id = $1;`,
+      [requestId]
+    );
+
+    if (brCheck.rowCount === 0) {
+      const error = new Error('Borrow request not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const preBr = brCheck.rows[0];
+
+    if (preBr.status !== 'CUSTODIAN_APPROVAL_PENDING') {
+      const error = new Error(`Cannot approve: request is in ${preBr.status} state.`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // 1. Lock the book first (canonical lock order: books → borrow_requests → handover_sessions)
+    const bookRes = await client.query(
+      `SELECT id, current_custodian_id, library_id FROM books WHERE id = $1 FOR UPDATE;`,
+      [preBr.book_id]
+    );
+
+    const book = bookRes.rows[0];
+
+    if (book.current_custodian_id !== custodianUserId) {
+      const error = new Error('Only the current custodian can approve this request.');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    // 2. Lock the borrow_request second
     const brRes = await client.query(
       `SELECT br.id, br.book_id, br.borrower_id, br.status
        FROM borrow_requests br
@@ -431,31 +467,11 @@ async function approveBorrowRequest(requestId, custodianUserId) {
       [requestId]
     );
 
-    if (brRes.rowCount === 0) {
-      const error = new Error('Borrow request not found.');
-      error.statusCode = 404;
-      throw error;
-    }
-
     const br = brRes.rows[0];
 
     if (br.status !== 'CUSTODIAN_APPROVAL_PENDING') {
       const error = new Error(`Cannot approve: request is in ${br.status} state.`);
       error.statusCode = 400;
-      throw error;
-    }
-
-    // Lock the book
-    const bookRes = await client.query(
-      `SELECT id, current_custodian_id, library_id FROM books WHERE id = $1 FOR UPDATE;`,
-      [br.book_id]
-    );
-
-    const book = bookRes.rows[0];
-
-    if (book.current_custodian_id !== custodianUserId) {
-      const error = new Error('Only the current custodian can approve this request.');
-      error.statusCode = 403;
       throw error;
     }
 
@@ -472,7 +488,7 @@ async function approveBorrowRequest(requestId, custodianUserId) {
       [requestId]
     );
 
-    // Generate PIN and create handover session
+    // 3. Generate PIN and create handover session
     const { pin, pinHash } = await generatePinAndHash();
     const expiresAt = new Date(Date.now() + handoverWindowHours * 60 * 60 * 1000);
 
@@ -517,7 +533,43 @@ async function declineBorrowRequest(requestId, custodianUserId) {
   try {
     await client.query('BEGIN');
 
-    // Lock book row first (canonical lock order)
+    // 0. Initial non-locking snapshot check to find book_id
+    const brCheck = await client.query(
+      `SELECT br.id, br.book_id, br.borrower_id, br.status
+       FROM borrow_requests br
+       WHERE br.id = $1;`,
+      [requestId]
+    );
+
+    if (brCheck.rowCount === 0) {
+      const error = new Error('Borrow request not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const preBr = brCheck.rows[0];
+
+    if (preBr.status !== 'CUSTODIAN_APPROVAL_PENDING') {
+      const error = new Error(`Cannot decline: request is in ${preBr.status} state.`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // 1. Lock book row first (canonical lock order: books → borrow_requests → handover_sessions)
+    const bookRes = await client.query(
+      `SELECT id, current_custodian_id, library_id FROM books WHERE id = $1 FOR UPDATE;`,
+      [preBr.book_id]
+    );
+
+    const book = bookRes.rows[0];
+
+    if (book.current_custodian_id !== custodianUserId) {
+      const error = new Error('Only the current custodian can decline this request.');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    // 2. Lock borrow_requests second
     const brRes = await client.query(
       `SELECT br.id, br.book_id, br.borrower_id, br.status
        FROM borrow_requests br
@@ -526,30 +578,11 @@ async function declineBorrowRequest(requestId, custodianUserId) {
       [requestId]
     );
 
-    if (brRes.rowCount === 0) {
-      const error = new Error('Borrow request not found.');
-      error.statusCode = 404;
-      throw error;
-    }
-
     const br = brRes.rows[0];
 
     if (br.status !== 'CUSTODIAN_APPROVAL_PENDING') {
       const error = new Error(`Cannot decline: request is in ${br.status} state.`);
       error.statusCode = 400;
-      throw error;
-    }
-
-    const bookRes = await client.query(
-      `SELECT id, current_custodian_id, library_id FROM books WHERE id = $1 FOR UPDATE;`,
-      [br.book_id]
-    );
-
-    const book = bookRes.rows[0];
-
-    if (book.current_custodian_id !== custodianUserId) {
-      const error = new Error('Only the current custodian can decline this request.');
-      error.statusCode = 403;
       throw error;
     }
 
@@ -591,6 +624,43 @@ async function cancelBorrowRequest(requestId, userId) {
   try {
     await client.query('BEGIN');
 
+    // 0. Initial non-locking snapshot check to find book_id and borrower
+    const brCheck = await client.query(
+      `SELECT br.id, br.book_id, br.borrower_id, br.status
+       FROM borrow_requests br
+       WHERE br.id = $1;`,
+      [requestId]
+    );
+
+    if (brCheck.rowCount === 0) {
+      const error = new Error('Borrow request not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const preBr = brCheck.rows[0];
+
+    if (preBr.borrower_id !== userId) {
+      const error = new Error('Only the borrower can cancel their own request.');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const cancellableStates = ['QUEUED', 'CUSTODIAN_APPROVAL_PENDING', 'HANDOVER_PENDING'];
+    if (!cancellableStates.includes(preBr.status)) {
+      const error = new Error(`Cannot cancel: request is in ${preBr.status} state.`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // 1. Lock book first (canonical lock order: books → borrow_requests → handover_sessions)
+    const bookRes = await client.query(
+      `SELECT id, library_id FROM books WHERE id = $1 FOR UPDATE;`,
+      [preBr.book_id]
+    );
+    const book = bookRes.rows[0];
+
+    // 2. Lock borrow_request second
     const brRes = await client.query(
       `SELECT br.id, br.book_id, br.borrower_id, br.status
        FROM borrow_requests br
@@ -598,36 +668,15 @@ async function cancelBorrowRequest(requestId, userId) {
        FOR UPDATE;`,
       [requestId]
     );
-
-    if (brRes.rowCount === 0) {
-      const error = new Error('Borrow request not found.');
-      error.statusCode = 404;
-      throw error;
-    }
-
     const br = brRes.rows[0];
 
-    if (br.borrower_id !== userId) {
-      const error = new Error('Only the borrower can cancel their own request.');
-      error.statusCode = 403;
-      throw error;
-    }
-
-    const cancellableStates = ['QUEUED', 'CUSTODIAN_APPROVAL_PENDING', 'HANDOVER_PENDING'];
     if (!cancellableStates.includes(br.status)) {
       const error = new Error(`Cannot cancel: request is in ${br.status} state.`);
       error.statusCode = 400;
       throw error;
     }
 
-    // Lock book
-    const bookRes = await client.query(
-      `SELECT id, library_id FROM books WHERE id = $1 FOR UPDATE;`,
-      [br.book_id]
-    );
-    const book = bookRes.rows[0];
-
-    // Cancel any pending handover sessions
+    // 3. Cancel any pending handover sessions (handover_sessions)
     await client.query(
       `UPDATE handover_sessions SET status = 'CANCELLED'
        WHERE borrow_request_id = $1 AND status = 'PENDING';`,
@@ -749,7 +798,49 @@ async function verifyPin(sessionId, pin, userId) {
   try {
     await client.query('BEGIN');
 
-    // Lock handover session
+    // 0. Initial non-locking snapshot check to find related IDs
+    const hsCheck = await client.query(
+      `SELECT hs.id, hs.borrow_request_id, hs.book_id, hs.receiver_user_id, hs.status
+       FROM handover_sessions hs
+       WHERE hs.id = $1;`,
+      [sessionId]
+    );
+
+    if (hsCheck.rowCount === 0) {
+      const error = new Error('Handover session not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const preHs = hsCheck.rows[0];
+
+    // Only the receiver verifies the PIN (receiver enters PIN given by giver)
+    if (preHs.receiver_user_id !== userId) {
+      const error = new Error('Only the receiver can verify the handover PIN.');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    if (preHs.status !== 'PENDING') {
+      const error = new Error(`Handover session is in ${preHs.status} state and cannot be verified.`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // 1. Lock book first (canonical lock order: books → borrow_requests → handover_sessions)
+    const bookRes = await client.query(
+      `SELECT id, library_id, current_custodian_id FROM books WHERE id = $1 FOR UPDATE;`,
+      [preHs.book_id]
+    );
+    const book = bookRes.rows[0];
+
+    // 2. Lock borrow_request second
+    await client.query(
+      `SELECT id, status FROM borrow_requests WHERE id = $1 FOR UPDATE;`,
+      [preHs.borrow_request_id]
+    );
+
+    // 3. Lock handover_session third
     const hsRes = await client.query(
       `SELECT hs.*, b.library_id, b.current_custodian_id
        FROM handover_sessions hs
@@ -759,20 +850,7 @@ async function verifyPin(sessionId, pin, userId) {
       [sessionId]
     );
 
-    if (hsRes.rowCount === 0) {
-      const error = new Error('Handover session not found.');
-      error.statusCode = 404;
-      throw error;
-    }
-
     const hs = hsRes.rows[0];
-
-    // Only the receiver verifies the PIN (receiver enters PIN given by giver)
-    if (hs.receiver_user_id !== userId) {
-      const error = new Error('Only the receiver can verify the handover PIN.');
-      error.statusCode = 403;
-      throw error;
-    }
 
     if (hs.status !== 'PENDING') {
       const error = new Error(`Handover session is in ${hs.status} state and cannot be verified.`);
@@ -790,11 +868,7 @@ async function verifyPin(sessionId, pin, userId) {
         `UPDATE borrow_requests SET status = 'EXPIRED' WHERE id = $1;`,
         [hs.borrow_request_id]
       );
-      // Lock book and advance queue
-      await client.query(
-        `SELECT id FROM books WHERE id = $1 FOR UPDATE;`,
-        [hs.book_id]
-      );
+      // Advance queue (books & borrow_requests already locked)
       await advanceQueue(client, hs.book_id, hs.library_id);
       await client.query('COMMIT');
 
@@ -829,11 +903,7 @@ async function verifyPin(sessionId, pin, userId) {
           `UPDATE borrow_requests SET status = 'FAILED' WHERE id = $1;`,
           [hs.borrow_request_id]
         );
-        // Lock book and advance queue
-        await client.query(
-          `SELECT id FROM books WHERE id = $1 FOR UPDATE;`,
-          [hs.book_id]
-        );
+        // Advance queue (books & borrow_requests already locked)
         await advanceQueue(client, hs.book_id, hs.library_id);
         await client.query('COMMIT');
 
@@ -890,7 +960,51 @@ async function confirmCondition(sessionId, userId, conditionRating, conditionNot
   try {
     await client.query('BEGIN');
 
-    // Lock handover session
+    // 0. Initial non-locking snapshot check to find related IDs
+    const hsCheck = await client.query(
+      `SELECT hs.id, hs.borrow_request_id, hs.book_id, hs.giver_user_id, hs.receiver_user_id, hs.status
+       FROM handover_sessions hs
+       WHERE hs.id = $1;`,
+      [sessionId]
+    );
+
+    if (hsCheck.rowCount === 0) {
+      const error = new Error('Handover session not found.');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const preHs = hsCheck.rows[0];
+
+    const isGiver = preHs.giver_user_id === userId;
+    const isReceiver = preHs.receiver_user_id === userId;
+
+    if (!isGiver && !isReceiver) {
+      const error = new Error('You are not authorized to confirm condition for this handover.');
+      error.statusCode = 403;
+      throw error;
+    }
+
+    if (preHs.status !== 'VERIFIED') {
+      const error = new Error('PIN must be verified before confirming condition.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // 1. Lock book first (canonical lock order: books → borrow_requests → handover_sessions)
+    const bookRes = await client.query(
+      `SELECT id, library_id, current_custodian_id FROM books WHERE id = $1 FOR UPDATE;`,
+      [preHs.book_id]
+    );
+    const bookRow = bookRes.rows[0];
+
+    // 2. Lock borrow_request second
+    await client.query(
+      `SELECT id, status FROM borrow_requests WHERE id = $1 FOR UPDATE;`,
+      [preHs.borrow_request_id]
+    );
+
+    // 3. Lock handover_session third
     const hsRes = await client.query(
       `SELECT hs.*, b.library_id, b.current_custodian_id
        FROM handover_sessions hs
@@ -900,26 +1014,11 @@ async function confirmCondition(sessionId, userId, conditionRating, conditionNot
       [sessionId]
     );
 
-    if (hsRes.rowCount === 0) {
-      const error = new Error('Handover session not found.');
-      error.statusCode = 404;
-      throw error;
-    }
-
     const hs = hsRes.rows[0];
 
     if (hs.status !== 'VERIFIED') {
       const error = new Error('PIN must be verified before confirming condition.');
       error.statusCode = 400;
-      throw error;
-    }
-
-    const isGiver = hs.giver_user_id === userId;
-    const isReceiver = hs.receiver_user_id === userId;
-
-    if (!isGiver && !isReceiver) {
-      const error = new Error('You are not authorized to confirm condition for this handover.');
-      error.statusCode = 403;
       throw error;
     }
 
@@ -962,14 +1061,7 @@ async function confirmCondition(sessionId, userId, conditionRating, conditionNot
     const bothConfirmed = Boolean(updated.giver_confirmed_at && updated.receiver_confirmed_at);
 
     if (bothConfirmed) {
-      // ── Atomic custody transfer ──
-
-      // Lock the book
-      const bookRes = await client.query(
-        `SELECT id, library_id, current_custodian_id FROM books WHERE id = $1 FOR UPDATE;`,
-        [hs.book_id]
-      );
-      const bookRow = bookRes.rows[0];
+      // ── Atomic custody transfer ── (books already locked above)
 
       // Load library rules for due date
       const rulesRes = await client.query(
@@ -1115,38 +1207,52 @@ async function expireOverdueHandovers() {
   try {
     await client.query('BEGIN');
 
-    // Find expired PENDING handover sessions
+    // 0. Find expired PENDING handover sessions without row locks
     const expiredRes = await client.query(
       `SELECT hs.id, hs.borrow_request_id, hs.book_id, b.library_id
        FROM handover_sessions hs
        JOIN books b ON b.id = hs.book_id
-       WHERE hs.status = 'PENDING' AND hs.expires_at < CURRENT_TIMESTAMP
-       FOR UPDATE;`
+       WHERE hs.status = 'PENDING' AND hs.expires_at < CURRENT_TIMESTAMP;`
     );
 
     let expiredCount = 0;
 
     for (const hs of expiredRes.rows) {
-      // Expire handover session
-      await client.query(
-        `UPDATE handover_sessions SET status = 'EXPIRED' WHERE id = $1;`,
-        [hs.id]
-      );
-
-      // Expire borrow request
-      await client.query(
-        `UPDATE borrow_requests SET status = 'EXPIRED' WHERE id = $1;`,
-        [hs.borrow_request_id]
-      );
-
-      // Lock book and advance queue
+      // 1. Lock book first (canonical lock order: books → borrow_requests → handover_sessions)
       await client.query(
         `SELECT id FROM books WHERE id = $1 FOR UPDATE;`,
         [hs.book_id]
       );
 
-      await advanceQueue(client, hs.book_id, hs.library_id);
-      expiredCount++;
+      // 2. Lock borrow_request second
+      await client.query(
+        `SELECT id FROM borrow_requests WHERE id = $1 FOR UPDATE;`,
+        [hs.borrow_request_id]
+      );
+
+      // 3. Lock handover_session third
+      const hsLock = await client.query(
+        `SELECT id, status FROM handover_sessions WHERE id = $1 FOR UPDATE;`,
+        [hs.id]
+      );
+
+      if (hsLock.rows[0]?.status === 'PENDING') {
+        // Expire handover session
+        await client.query(
+          `UPDATE handover_sessions SET status = 'EXPIRED' WHERE id = $1;`,
+          [hs.id]
+        );
+
+        // Expire borrow request
+        await client.query(
+          `UPDATE borrow_requests SET status = 'EXPIRED' WHERE id = $1;`,
+          [hs.borrow_request_id]
+        );
+
+        // Advance queue (books & borrow_requests already locked)
+        await advanceQueue(client, hs.book_id, hs.library_id);
+        expiredCount++;
+      }
     }
 
     await client.query('COMMIT');
@@ -1271,4 +1377,5 @@ module.exports = {
   expireOverdueHandovers,
   listRequestsForBook,
   getMyRequests,
+  advanceQueue,
 };

@@ -4,10 +4,12 @@ const { requireAuth } = require('../../middlewares/authenticate');
 const { requireLibrarian } = require('../../middlewares/authorize');
 const { verifyCsrf } = require('../../middlewares/csrf');
 
+const { searchLimiter } = require('../../middlewares/rateLimiter');
+
 const router = express.Router();
 
 // Public discovery
-router.get('/', librariesController.search);
+router.get('/', searchLimiter, librariesController.search);
 router.get('/:id', librariesController.getById);
 
 // Library creation (Authenticated)

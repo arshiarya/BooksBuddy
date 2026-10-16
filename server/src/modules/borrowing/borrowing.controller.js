@@ -199,7 +199,9 @@ async function confirmCondition(req, res, next) {
       });
     }
 
-    const { condition_rating, condition_notes } = req.body || {};
+    const condition_rating = req.body?.condition_rating || req.body?.conditionRating;
+    const condition_notes = req.body?.condition_notes || req.body?.conditionNotes;
+
     if (!condition_rating) {
       return res.status(400).json({
         error: { message: 'condition_rating is required (NEW, GOOD, FAIR, or DAMAGED).', statusCode: 400 },
