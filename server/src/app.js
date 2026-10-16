@@ -27,6 +27,7 @@ app.use(cookieParser());
 const { authenticate } = require('./middlewares/authenticate');
 const { verifyCsrf } = require('./middlewares/csrf');
 const authRoutes = require('./modules/auth/auth.routes');
+const libraryRoutes = require('./modules/libraries/libraries.routes');
 
 // Global authentication and CSRF middlewares
 app.use(authenticate);
@@ -34,6 +35,7 @@ app.use(verifyCsrf);
 
 // Mount domain routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/libraries', libraryRoutes);
 
 const db = require('./config/db');
 
