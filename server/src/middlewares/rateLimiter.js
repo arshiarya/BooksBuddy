@@ -56,6 +56,12 @@ function createRateLimiter({
 
     next();
   };
+
+  middleware.reset = () => {
+    ipHits.clear();
+  };
+
+  return middleware;
 }
 
 module.exports = {

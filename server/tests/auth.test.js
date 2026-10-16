@@ -1,13 +1,23 @@
-const { test, describe, after } = require('node:test');
+const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
 const app = require('../src/app');
 const db = require('../src/config/db');
+const authRoutes = require('../src/modules/auth/auth.routes');
 
 describe('Authentication & Server-Side Sessions (Phase 3)', () => {
+  before(() => {
+    if (authRoutes.authLimiter?.reset) {
+      authRoutes.authLimiter.reset();
+    }
+  });
+
   after(async () => {
     // Clean up test user and sessions created during testing
     await db.query("DELETE FROM users WHERE email LIKE 'authtest_%@example.com';");
+    if (authRoutes.authLimiter?.reset) {
+      authRoutes.authLimiter.reset();
+    }
   });
 
   const uniqueEmail = `authtest_${Date.now()}@example.com`;

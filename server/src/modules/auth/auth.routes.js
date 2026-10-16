@@ -22,4 +22,6 @@ router.get('/csrf-token', authController.getCsrfToken);
 router.get('/me', requireAuth, authController.getMe);
 router.post('/logout', requireAuth, verifyCsrf, authController.logout);
 
+router.authLimiter = authLimiter;
+
 module.exports = router;
