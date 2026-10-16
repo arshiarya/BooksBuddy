@@ -256,6 +256,17 @@ async function earlyRelease(req, res, next) {
   }
 }
 
+// ─── Get My Requests & Custody ───────────────────────────
+
+async function getMyRequests(req, res, next) {
+  try {
+    const data = await borrowingService.getMyRequests(req.user.id);
+    res.status(200).json(data);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   createRequest,
   getRequest,
@@ -267,4 +278,5 @@ module.exports = {
   verifyHandoverPin,
   confirmCondition,
   earlyRelease,
+  getMyRequests,
 };

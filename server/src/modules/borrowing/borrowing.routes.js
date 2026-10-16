@@ -13,6 +13,9 @@ const router = express.Router();
 
 // ─── Borrow Requests ────────────────────────────────────
 
+// List current user's borrow requests, incoming custodian actions, and custody books
+router.get('/my-requests', requireAuth, borrowingController.getMyRequests);
+
 // Create a borrow request (or join the FIFO queue)
 router.post('/requests', requireAuth, verifyCsrf, borrowingController.createRequest);
 

@@ -1204,6 +1204,60 @@ async function listRequestsForBook(bookId, userId) {
   return res.rows;
 }
 
+// ─── List My Requests & Custody ───────────────────────────
+
+/**
+ * Returns all requests and physical custody books for the user.
+ */
+async function getMyRequests(userId) {
+  const asBorrower = await db.query(
+    `SELECT br.*, b.title AS book_title, b.author AS book_author, b.library_id,
+            b.current_custodian_id, b.status AS book_status,
+            l.name AS library_name,
+            hs.id AS handover_session_id, hs.status AS handover_status
+     FROM borrow_requests br
+     JOIN books b ON b.id = br.book_id
+     JOIN libraries l ON l.id = b.library_id
+     LEFT JOIN handover_sessions hs ON hs.borrow_request_id = br.id AND hs.status = 'PENDING'
+     WHERE br.borrower_id = $1
+     ORDER BY br.created_at DESC;`,
+    [userId]
+  );
+
+  const asCustodian = await db.query(
+    `SELECT br.*, b.title AS book_title, b.author AS book_author, b.library_id,
+            b.current_custodian_id, b.status AS book_status,
+            l.name AS library_name,
+            u.full_name AS borrower_name,
+            hs.id AS handover_session_id, hs.status AS handover_status
+     FROM borrow_requests br
+     JOIN books b ON b.id = br.book_id
+     JOIN libraries l ON l.id = b.library_id
+     JOIN users u ON u.id = br.borrower_id
+     LEFT JOIN handover_sessions hs ON hs.borrow_request_id = br.id AND hs.status = 'PENDING'
+     WHERE b.current_custodian_id = $1
+       AND br.status IN ('CUSTODIAN_APPROVAL_PENDING', 'HANDOVER_PENDING', 'ACTIVE')
+     ORDER BY br.created_at DESC;`,
+    [userId]
+  );
+
+  const inCustody = await db.query(
+    `SELECT b.*, l.name AS library_name
+     FROM books b
+     JOIN libraries l ON l.id = b.library_id
+     WHERE b.current_custodian_id = $1
+       AND b.status != 'REMOVED'
+     ORDER BY b.title ASC;`,
+    [userId]
+  );
+
+  return {
+    asBorrower: asBorrower.rows,
+    asCustodian: asCustodian.rows,
+    inCustody: inCustody.rows,
+  };
+}
+
 module.exports = {
   createBorrowRequest,
   getBorrowRequest,
@@ -1216,4 +1270,5 @@ module.exports = {
   initiateEarlyRelease,
   expireOverdueHandovers,
   listRequestsForBook,
+  getMyRequests,
 };
