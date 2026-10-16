@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const db = require('../../config/db');
+const { broadcastHandoverStatus } = require('../../sockets/socketServer');
 
 /**
  * Phase 6: Borrowing, FIFO Queue, PIN Handover & Custody Service.
@@ -486,6 +487,11 @@ async function approveBorrowRequest(requestId, custodianUserId) {
 
     await client.query('COMMIT');
 
+    broadcastHandoverStatus(requestId, 'HANDOVER_PENDING', {
+      status: 'HANDOVER_PENDING',
+      handoverSessionId: hsRes.rows[0].id,
+    });
+
     return {
       borrowRequest: { id: requestId, status: 'HANDOVER_PENDING' },
       handoverSession: {
@@ -557,6 +563,10 @@ async function declineBorrowRequest(requestId, custodianUserId) {
     const advancement = await advanceQueue(client, br.book_id, book.library_id);
 
     await client.query('COMMIT');
+
+    broadcastHandoverStatus(requestId, 'DECLINED', {
+      status: 'DECLINED',
+    });
 
     return {
       borrowRequest: { id: requestId, status: 'DECLINED' },
@@ -634,6 +644,10 @@ async function cancelBorrowRequest(requestId, userId) {
     const advancement = await advanceQueue(client, br.book_id, book.library_id);
 
     await client.query('COMMIT');
+
+    broadcastHandoverStatus(requestId, 'CANCELLED', {
+      status: 'CANCELLED',
+    });
 
     return {
       borrowRequest: { id: requestId, status: 'CANCELLED' },
@@ -843,6 +857,11 @@ async function verifyPin(sessionId, pin, userId) {
 
     await client.query('COMMIT');
 
+    broadcastHandoverStatus(hs.borrow_request_id, 'VERIFIED', {
+      status: 'VERIFIED',
+      handoverSessionId: sessionId,
+    });
+
     return { verified: true, sessionId };
   } catch (err) {
     if (!client._ended) {
@@ -994,6 +1013,14 @@ async function confirmCondition(sessionId, userId, conditionRating, conditionNot
     }
 
     await client.query('COMMIT');
+
+    if (bothConfirmed) {
+      broadcastHandoverStatus(hs.borrow_request_id, 'ACTIVE', {
+        status: 'ACTIVE',
+        newCustodianId: hs.receiver_user_id,
+        bookId: hs.book_id,
+      });
+    }
 
     return {
       confirmed: true,

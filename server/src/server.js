@@ -1,12 +1,15 @@
 const http = require('http');
 const app = require('./app');
 const env = require('./config/env');
+const { initSocketServer } = require('./sockets/socketServer');
 
 const server = http.createServer(app);
+const io = initSocketServer(server);
 
 server.listen(env.PORT, () => {
   console.log(`[BooksBuddy Server] Running in ${env.NODE_ENV} mode on http://localhost:${env.PORT}`);
   console.log(`[BooksBuddy Server] Health check available at http://localhost:${env.PORT}/health`);
+  console.log(`[BooksBuddy Server] Socket.IO real-time engine initialized`);
 });
 
 // Graceful shutdown handling
