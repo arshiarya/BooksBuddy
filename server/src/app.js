@@ -15,7 +15,7 @@ app.use(
     origin: env.CLIENT_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'x-csrf-token'],
   })
 );
 
@@ -23,6 +23,17 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+const { authenticate } = require('./middlewares/authenticate');
+const { verifyCsrf } = require('./middlewares/csrf');
+const authRoutes = require('./modules/auth/auth.routes');
+
+// Global authentication and CSRF middlewares
+app.use(authenticate);
+app.use(verifyCsrf);
+
+// Mount domain routes
+app.use('/api/v1/auth', authRoutes);
 
 const db = require('./config/db');
 
@@ -62,13 +73,15 @@ app.use((req, res, next) => {
 
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
-  console.error('[SERVER ERROR]', err);
   const statusCode = err.statusCode || 500;
+  if (statusCode >= 500) {
+    console.error('[SERVER ERROR]', err);
+  }
   res.status(statusCode).json({
     error: {
       message: err.message || 'Internal Server Error',
       statusCode,
-      ...(env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
+      ...(env.NODE_ENV === 'development' && statusCode >= 500 ? { stack: err.stack } : {}),
     },
   });
 });

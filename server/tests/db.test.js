@@ -4,10 +4,6 @@ const db = require('../src/config/db');
 const { runMigrations } = require('../src/database/migrate');
 
 describe('Database Engine & Schema Verification (Phase 2)', () => {
-  after(async () => {
-    // Close pool after tests complete
-    await db.pool.end();
-  });
 
   test('Database connection pool is healthy and returns PostgreSQL version', async () => {
     const health = await db.healthCheck();
