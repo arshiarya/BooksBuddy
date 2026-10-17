@@ -497,6 +497,28 @@ describe('Frontend Architecture, API Client & Security (Phase 9)', () => {
     // Non-member library:
     assert.strictEqual(getMembershipButtonState(user, 99), 'Join Library (Request to Join)');
   });
+
+  test('Platform Admin role normalizer and RBAC guard correctly identifies platform administrators', () => {
+    const rawAdmin = {
+      id: 5,
+      full_name: 'Platform Admin',
+      email: 'admin@booksbuddy.local',
+      role: 'PLATFORM_ADMIN',
+    };
+    const adminUser = normalizeUser(rawAdmin);
+    assert.strictEqual(adminUser.role, 'PLATFORM_ADMIN');
+    assert.strictEqual(adminUser.isPlatformAdmin, true);
+
+    const rawNormalUser = {
+      id: 1,
+      full_name: 'Regular User',
+      email: 'user@example.com',
+      role: 'USER',
+    };
+    const normalUser = normalizeUser(rawNormalUser);
+    assert.strictEqual(normalUser.role, 'USER');
+    assert.strictEqual(normalUser.isPlatformAdmin, false);
+  });
 });
 
 

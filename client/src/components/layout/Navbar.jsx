@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Compass, BookMarked, Plus, LogIn, LogOut, Menu, X } from 'lucide-react';
+import { Compass, BookMarked, Plus, LogIn, LogOut, Menu, X, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigation } from '../../context/NavigationContext';
 import { Button } from '../common/Button';
@@ -15,11 +15,16 @@ export function Navbar() {
     navigate('/login');
   };
 
+  const isPlatformAdmin = Boolean(user && (user.isPlatformAdmin || user.role === 'PLATFORM_ADMIN'));
+
   const navLinks = [
     { name: 'Explore Libraries', path: '/', icon: Compass },
     ...(user
       ? [
           { name: 'My Shelf & Requests', path: '/my-books', icon: BookMarked },
+          ...(isPlatformAdmin
+            ? [{ name: 'Platform Admin', path: '/admin', icon: ShieldCheck }]
+            : []),
         ]
       : []),
   ];

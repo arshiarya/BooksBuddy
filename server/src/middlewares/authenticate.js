@@ -19,7 +19,7 @@ async function authenticate(req, res, next) {
   try {
     const query = `
       SELECT s.id AS session_id, s.user_id, s.expires_at, s.csrf_token, s.last_accessed_at,
-             u.id, u.email, u.full_name, u.phone, u.society_locality, u.flat_house_number, u.city, u.created_at
+             u.id, u.email, u.full_name, u.phone, u.society_locality, u.flat_house_number, u.city, u.role, u.created_at
       FROM sessions s
       JOIN users u ON u.id = s.user_id
       WHERE s.id = $1 AND s.expires_at > CURRENT_TIMESTAMP;
@@ -40,6 +40,8 @@ async function authenticate(req, res, next) {
       id: row.id,
       email: row.email,
       fullName: row.full_name,
+      role: row.role || 'USER',
+      isPlatformAdmin: row.role === 'PLATFORM_ADMIN',
       phone: row.phone,
       societyLocality: row.society_locality,
       flatHouseNumber: row.flat_house_number,

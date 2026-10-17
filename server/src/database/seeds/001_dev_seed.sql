@@ -18,13 +18,14 @@ TRUNCATE TABLE
     users
 RESTART IDENTITY CASCADE;
 
--- 1. USERS (Password for all accounts: Password123!)
-INSERT INTO users (id, email, password_hash, full_name, phone, society_locality, flat_house_number, city)
+-- 1. USERS (Password for standard test accounts: Password123!, Platform Admin: Admin#BB2026!LocalDev)
+INSERT INTO users (id, email, password_hash, full_name, phone, society_locality, flat_house_number, city, role)
 VALUES 
-    (1, 'aarav@example.com', '$2b$10$t35NFTHAFnd4qpZ1XODur.KssuQTIcNO/u7Tbm15GOAylbcCMTyZe', 'Aarav Sharma', '+919876543210', 'Greenwood Estate, Bellandur', 'Tower A-402', 'Bengaluru'),
-    (2, 'priya@example.com', '$2b$10$t35NFTHAFnd4qpZ1XODur.KssuQTIcNO/u7Tbm15GOAylbcCMTyZe', 'Priya Patel', '+919876543211', 'Greenwood Estate, Bellandur', 'Tower B-105', 'Bengaluru'),
-    (3, 'rohan@example.com', '$2b$10$t35NFTHAFnd4qpZ1XODur.KssuQTIcNO/u7Tbm15GOAylbcCMTyZe', 'Rohan Verma', '+919876543212', 'Greenwood Estate, Bellandur', 'Tower C-204', 'Bengaluru'),
-    (4, 'ananya@example.com', '$2b$10$t35NFTHAFnd4qpZ1XODur.KssuQTIcNO/u7Tbm15GOAylbcCMTyZe', 'Ananya Iyer', '+919876543213', 'Greenwood Estate, Bellandur', 'Tower A-301', 'Bengaluru');
+    (1, 'aarav@example.com', '$2b$10$t35NFTHAFnd4qpZ1XODur.KssuQTIcNO/u7Tbm15GOAylbcCMTyZe', 'Aarav Sharma', '+919876543210', 'Greenwood Estate, Bellandur', 'Tower A-402', 'Bengaluru', 'USER'),
+    (2, 'priya@example.com', '$2b$10$t35NFTHAFnd4qpZ1XODur.KssuQTIcNO/u7Tbm15GOAylbcCMTyZe', 'Priya Patel', '+919876543211', 'Greenwood Estate, Bellandur', 'Tower B-105', 'Bengaluru', 'USER'),
+    (3, 'rohan@example.com', '$2b$10$t35NFTHAFnd4qpZ1XODur.KssuQTIcNO/u7Tbm15GOAylbcCMTyZe', 'Rohan Verma', '+919876543212', 'Greenwood Estate, Bellandur', 'Tower C-204', 'Bengaluru', 'USER'),
+    (4, 'ananya@example.com', '$2b$10$t35NFTHAFnd4qpZ1XODur.KssuQTIcNO/u7Tbm15GOAylbcCMTyZe', 'Ananya Iyer', '+919876543213', 'Greenwood Estate, Bellandur', 'Tower A-301', 'Bengaluru', 'USER'),
+    (5, 'admin@booksbuddy.local', '$2b$12$fJL0v3BdQI1zlzj08XR/vu.R.JO9R9MD9xH3CF6oY7zgATr4/QJMu', 'Platform Admin', '+919999900000', 'BooksBuddy Operations HQ', 'Suite 101', 'Bengaluru', 'PLATFORM_ADMIN');
 
 -- Reset users sequence to next value
 SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));

@@ -8,6 +8,8 @@ export function normalizeUser(rawUser) {
   return {
     ...rawUser,
     fullName: rawUser.fullName ?? rawUser.full_name ?? '',
+    role: rawUser.role || 'USER',
+    isPlatformAdmin: rawUser.role === 'PLATFORM_ADMIN' || rawUser.isPlatformAdmin === true,
     societyLocality: rawUser.societyLocality ?? rawUser.society_locality ?? '',
     flatHouseNumber: rawUser.flatHouseNumber ?? rawUser.flat_house_number ?? '',
     createdAt: rawUser.createdAt ?? rawUser.created_at ?? null,

@@ -32,6 +32,7 @@ const bookRoutes = require('./modules/books/books.routes');
 const borrowingRoutes = require('./modules/borrowing/borrowing.routes');
 const chatRoutes = require('./modules/chat/chat.routes');
 const communityRoutes = require('./modules/community/community.routes');
+const adminRoutes = require('./modules/admin/admin.routes');
 
 // Global authentication and CSRF middlewares
 app.use(authenticate);
@@ -44,6 +45,7 @@ app.use('/api/v1/books', bookRoutes);
 app.use('/api/v1/borrowing', borrowingRoutes);
 app.use('/api/v1/chat', chatRoutes);
 app.use('/api/v1/community', communityRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 const db = require('./config/db');
 

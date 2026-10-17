@@ -16,6 +16,7 @@ import { BookDetailScreen } from './screens/BookDetailScreen';
 import { MyBooksDashboardScreen } from './screens/MyBooksDashboardScreen';
 import { HandoverScreen } from './screens/HandoverScreen';
 import { ChatScreen } from './screens/ChatScreen';
+import { PlatformAdminScreen } from './screens/PlatformAdminScreen';
 import { Lock } from 'lucide-react';
 
 /**
@@ -101,6 +102,13 @@ function AppRouter() {
     return (
       <ProtectedRoute>
         <MyBooksDashboardScreen />
+      </ProtectedRoute>
+    );
+  }
+  if (currentPath === '/admin') {
+    return (
+      <ProtectedRoute>
+        <PlatformAdminScreen />
       </ProtectedRoute>
     );
   }

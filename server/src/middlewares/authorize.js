@@ -156,8 +156,34 @@ function requirePrimaryLibrarian(libraryIdParam = 'id') {
   };
 }
 
+/**
+ * Requires the authenticated user to hold the PLATFORM_ADMIN role.
+ */
+function requirePlatformAdmin(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({
+      error: {
+        message: 'Authentication required. Please log in to continue.',
+        statusCode: 401,
+      },
+    });
+  }
+
+  if (req.user.role !== 'PLATFORM_ADMIN' && !req.user.isPlatformAdmin) {
+    return res.status(403).json({
+      error: {
+        message: 'Platform administrator privileges required.',
+        statusCode: 403,
+      },
+    });
+  }
+
+  next();
+}
+
 module.exports = {
   requireLibraryMember,
   requireLibrarian,
   requirePrimaryLibrarian,
+  requirePlatformAdmin,
 };

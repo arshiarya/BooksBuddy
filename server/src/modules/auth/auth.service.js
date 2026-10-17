@@ -85,7 +85,7 @@ async function registerUser({
        email, password_hash, full_name, phone,
        society_locality, flat_house_number, city
      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-     RETURNING id, email, full_name, phone, society_locality, flat_house_number, city, created_at;`,
+     RETURNING id, email, full_name, phone, society_locality, flat_house_number, city, role, created_at;`,
     [
       normalizedEmail,
       passwordHash,
@@ -119,7 +119,7 @@ async function loginUser({ email, password, currentSessionId }) {
 
   const res = await db.query(
     `SELECT id, email, password_hash, full_name, phone,
-            society_locality, flat_house_number, city, created_at
+            society_locality, flat_house_number, city, role, created_at
      FROM users 
      WHERE email = $1;`,
     [normalizedEmail]
@@ -161,7 +161,7 @@ async function loginUser({ email, password, currentSessionId }) {
  */
 async function getUserWithMemberships(userId) {
   const userRes = await db.query(
-    `SELECT id, email, full_name, phone, society_locality, flat_house_number, city, created_at
+    `SELECT id, email, full_name, phone, society_locality, flat_house_number, city, role, created_at
      FROM users 
      WHERE id = $1;`,
     [userId]

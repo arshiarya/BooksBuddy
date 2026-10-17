@@ -58,6 +58,9 @@ async function searchLibraries({
   const params = [];
   let paramIdx = 1;
 
+  // Only active libraries appear in public search/discovery
+  conditions.push("COALESCE(l.status, 'ACTIVE') = 'ACTIVE'");
+
   if (q && q.trim()) {
     conditions.push(`(l.name ILIKE $${paramIdx} OR l.society_locality ILIKE $${paramIdx} OR l.city ILIKE $${paramIdx} OR l.description ILIKE $${paramIdx})`);
     params.push(`%${q.trim()}%`);
@@ -85,7 +88,7 @@ async function searchLibraries({
   `;
 
   const dataQuery = `
-    SELECT l.id, l.name, l.slug, l.society_locality, l.city, l.description, l.is_verified,
+    SELECT l.id, l.name, l.slug, l.society_locality, l.city, l.description, l.is_verified, l.status,
            l.max_borrow_days, l.handover_window_hours, l.max_books_per_member, l.max_renewals,
            l.created_at,
            COUNT(DISTINCT b.id) FILTER (WHERE b.status != 'REMOVED') AS total_books,
