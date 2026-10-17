@@ -119,8 +119,7 @@ export function LibrariesDiscoveryScreen() {
           </h1>
 
           <p className="text-sm sm:text-base text-[#D8E5DD] leading-relaxed max-w-xl">
-            BooksBuddy connects people in the same society or locality so they can share books,
-            discover new reads, and keep books circulating within their community.
+            BooksBuddy is a virtual community library. Neighbors share personal books without central storage—books stay safely with community members until a secure handover happens, moving from member to member.
           </p>
 
           <div className="pt-3 flex flex-wrap items-center gap-3">
@@ -332,7 +331,7 @@ export function LibrariesDiscoveryScreen() {
                         className="w-full font-semibold"
                         icon={ArrowRight}
                       >
-                        Enter Library
+                        Open Library
                       </Button>
                     ) : isPending ? (
                       <Button
@@ -341,7 +340,7 @@ export function LibrariesDiscoveryScreen() {
                         disabled
                         className="w-full text-[#8C5D23] bg-[#FAF4ED] border-[#E7C8AA] cursor-default font-semibold"
                       >
-                        Awaiting Approval
+                        Request Pending
                       </Button>
                     ) : (
                       <Button
@@ -350,7 +349,7 @@ export function LibrariesDiscoveryScreen() {
                         onClick={() => setSelectedLibraryToJoin(lib)}
                         className="w-full font-semibold"
                       >
-                        Request to Join
+                        Join Library <span className="text-xs opacity-75 font-normal">(Request to Join)</span>
                       </Button>
                     )}
                   </div>

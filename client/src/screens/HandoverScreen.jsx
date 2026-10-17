@@ -40,7 +40,7 @@ export function HandoverScreen({ sessionId }) {
         socket.emit('join_room', { borrowRequestId: res.handoverSession.borrow_request_id });
       }
     } catch (err) {
-      showToast(err.message || 'Failed to load handover session.', 'error');
+      showToast(err.message || 'Failed to load book handover.', 'error');
     } finally {
       setLoading(false);
     }
@@ -65,15 +65,15 @@ export function HandoverScreen({ sessionId }) {
   }, [sessionId]);
 
   if (loading) {
-    return <LoadingSpinner text="Loading handover verification session..." />;
+    return <LoadingSpinner text="Loading book handover details..." />;
   }
 
   if (!session) {
     return (
       <EmptyState
         icon={KeyRound}
-        title="Handover session not found"
-        description="This handover session may have expired, completed, or you are not authorized to view it."
+        title="Book handover not found"
+        description="This handover may have expired, completed, or you are not authorized to view it."
         actionText="Back to My Books"
         onAction={() => navigate('/my-books')}
       />
@@ -173,7 +173,7 @@ export function HandoverScreen({ sessionId }) {
               </div>
               {(session.pickup_address?.phone || session.giver_phone) && (
                 <div>
-                  <span className="text-muted font-medium">Custodian Phone: </span>
+                  <span className="text-muted font-medium">Contact Phone: </span>
                   <strong className="text-charcoal font-mono">
                     {session.pickup_address?.phone || session.giver_phone}
                   </strong>
@@ -181,7 +181,7 @@ export function HandoverScreen({ sessionId }) {
               )}
             </div>
             <p className="text-[11px] text-muted italic pt-1">
-              Protected address revealed exclusively to you as the authorized borrower for this handover.
+              Protected address revealed exclusively to you as the authorized receiver for this handover.
             </p>
           </div>
         )}

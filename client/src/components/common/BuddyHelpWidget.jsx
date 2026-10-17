@@ -37,7 +37,7 @@ const HELP_TOPICS = [
     title: 'Borrowing a book',
     summary: 'Browse available books or join the waiting list for high-demand titles.',
     content:
-      'When you request an available book, the current holder receives a notification. If a book is currently borrowed by someone else, you are placed in a fair FIFO waiting queue with a visible position.',
+      'When you request an available book, the current holder receives a notification. If a book is currently borrowed by someone else, you are placed in a fair waiting list with a visible position.',
   },
   {
     id: 'adding-books',

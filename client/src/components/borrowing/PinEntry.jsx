@@ -57,7 +57,7 @@ export function PinEntry({ sessionId, verifiedAt, attemptsLeft = 3, onSuccess })
       </div>
 
       <p className="text-xs text-charcoal-muted leading-relaxed">
-        Ask the current custodian for the 4-digit PIN when you meet in person to collect the book.
+        Ask the current holder for the 4-digit PIN when you meet in person to collect the book.
       </p>
 
       {error && (

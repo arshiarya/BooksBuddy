@@ -11,6 +11,7 @@ export function normalizeUser(rawUser) {
     societyLocality: rawUser.societyLocality ?? rawUser.society_locality ?? '',
     flatHouseNumber: rawUser.flatHouseNumber ?? rawUser.flat_house_number ?? '',
     createdAt: rawUser.createdAt ?? rawUser.created_at ?? null,
+    memberships: Array.isArray(rawUser.memberships) ? rawUser.memberships : (rawUser.memberships || []),
   };
 }
 

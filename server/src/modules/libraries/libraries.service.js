@@ -59,7 +59,7 @@ async function searchLibraries({
   let paramIdx = 1;
 
   if (q && q.trim()) {
-    conditions.push(`(l.name ILIKE $${paramIdx} OR l.description ILIKE $${paramIdx})`);
+    conditions.push(`(l.name ILIKE $${paramIdx} OR l.society_locality ILIKE $${paramIdx} OR l.city ILIKE $${paramIdx} OR l.description ILIKE $${paramIdx})`);
     params.push(`%${q.trim()}%`);
     paramIdx += 1;
   }

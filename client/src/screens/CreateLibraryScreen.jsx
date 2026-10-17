@@ -73,7 +73,7 @@ export function CreateLibraryScreen() {
           <ShieldCheck className="w-5 h-5 text-forest shrink-0 mt-0.5" />
           <p className="leading-relaxed">
             As the founder, you will be appointed as the <strong>Primary Librarian</strong>, granting
-            you full authority to configure loan periods, approve members, appoint co-librarians, and
+            you full authority to configure borrow periods, approve members, appoint co-librarians, and
             moderate the collection.
           </p>
         </div>
@@ -160,7 +160,7 @@ export function CreateLibraryScreen() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
                 <label className="block text-[11px] font-bold text-charcoal mb-1">
-                  Loan (Days)
+                  Borrow (Days)
                 </label>
                 <input
                   type="number"

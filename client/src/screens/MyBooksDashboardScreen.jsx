@@ -50,7 +50,7 @@ export function MyBooksDashboardScreen() {
     setActionLoading(true);
     try {
       await borrowingApi.approveRequest(requestId);
-      showToast('Borrow request approved! Handover session active.', 'success');
+      showToast('Borrow request approved! Book handover active.', 'success');
       loadData();
     } catch (err) {
       showToast(err.message || 'Failed to approve request.', 'error');
@@ -127,10 +127,11 @@ export function MyBooksDashboardScreen() {
                   <p className="text-xs text-muted">
                     Requested by <strong className="text-charcoal">{item.borrower_name}</strong> in {item.library_name}
                   </p>
-                  <p className="text-[11px] text-muted">
-                    Status: <strong className="text-forest">{item.status}</strong> &bull; Requested on{' '}
-                    {new Date(item.created_at).toLocaleDateString()}
-                  </p>
+                  <div className="text-[11px] text-muted flex items-center gap-2">
+                    <span>Status:</span>
+                    <BorrowStatusBadge status={item.status} size="sm" />
+                    <span>&bull; Requested on {new Date(item.created_at).toLocaleDateString()}</span>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">

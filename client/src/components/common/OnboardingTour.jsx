@@ -47,7 +47,7 @@ const TOUR_STEPS = [
     description: 'Request available books directly from current holders or join the waiting list for popular titles.',
     buddyState: 'pointing',
     icon: BookHeart,
-    tip: 'Fair FIFO queues guarantee everyone in the community gets their turn to read.',
+    tip: 'Fair waiting lists guarantee everyone in the community gets their turn to read.',
   },
   {
     step: 5,

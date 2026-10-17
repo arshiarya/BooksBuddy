@@ -139,6 +139,46 @@ describe('Authentication & Server-Side Sessions (Phase 3)', () => {
     csrfToken = res.body.csrfToken;
   });
 
+  test('Regression: POST /api/v1/auth/login hydrates user memberships immediately without page refresh', async () => {
+    // Get validUser ID
+    const userRes = await db.query('SELECT id FROM users WHERE email = $1;', [uniqueEmail.toLowerCase()]);
+    const userId = userRes.rows[0].id;
+
+    // 1. Create a library and add validUser as an APPROVED member
+    const libRes = await db.query(
+      `INSERT INTO libraries (name, slug, society_locality, city, invite_code, created_by)
+       VALUES ('Hydration Test Library', $1, 'Test Locality', 'Bengaluru', 'TEST-HYD1', $2)
+       RETURNING id;`,
+      [`hyd-test-${Date.now()}`, userId]
+    );
+    const libId = libRes.rows[0].id;
+
+    await db.query(
+      `INSERT INTO library_members (library_id, user_id, role, status)
+       VALUES ($1, $2, 'MEMBER', 'APPROVED');`,
+      [libId, userId]
+    );
+
+    // 2. Perform fresh login
+    const loginRes = await request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: uniqueEmail,
+        password: validUser.password,
+      });
+
+    assert.equal(loginRes.status, 200);
+    // Crucial regression assertion: user returned on login MUST contain memberships array
+    assert.ok(Array.isArray(loginRes.body.user.memberships), 'Login response must contain memberships array');
+    const hasMembership = loginRes.body.user.memberships.some(
+      (m) => Number(m.library_id) === Number(libId) && m.status === 'APPROVED'
+    );
+    assert.ok(hasMembership, 'Approved membership must be immediately hydrated in login response');
+
+    // Clean up test library
+    await db.query('DELETE FROM libraries WHERE id = $1;', [libId]);
+  });
+
   test('GET /api/v1/auth/me returns authenticated user profile and memberships', async () => {
     const res = await request(app)
       .get('/api/v1/auth/me')

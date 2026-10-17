@@ -462,6 +462,41 @@ describe('Frontend Architecture, API Client & Security (Phase 9)', () => {
     const flatResponse = { invite_code: 'XYZ9876' };
     assert.strictEqual(flatResponse.library?.invite_code || flatResponse.invite_code, 'XYZ9876');
   });
+
+  test('Membership state synchronization: approved member immediately evaluates to Open Library without refresh', () => {
+    // Simulated raw backend login response after fix
+    const rawLoginUser = {
+      id: 5,
+      full_name: 'Resident Reader',
+      email: 'reader@example.com',
+      society_locality: 'Greenwood',
+      memberships: [
+        {
+          membership_id: 12,
+          library_id: 42,
+          role: 'MEMBER',
+          status: 'APPROVED',
+          library_name: 'Greenwood Library',
+        },
+      ],
+    };
+
+    const user = normalizeUser(rawLoginUser);
+
+    function getMembershipButtonState(user, libraryId) {
+      if (!user || !user.memberships) return 'Join Library (Request to Join)';
+      const mem = user.memberships.find((m) => Number(m.library_id) === Number(libraryId));
+      if (!mem) return 'Join Library (Request to Join)';
+      if (mem.status === 'APPROVED') return 'Open Library';
+      if (mem.status === 'PENDING') return 'Request Pending';
+      return 'Join Library (Request to Join)';
+    }
+
+    // Immediately after login, before any page refresh or getMe call:
+    assert.strictEqual(getMembershipButtonState(user, 42), 'Open Library');
+    // Non-member library:
+    assert.strictEqual(getMembershipButtonState(user, 99), 'Join Library (Request to Join)');
+  });
 });
 
 

@@ -89,6 +89,48 @@ describe('Libraries & Membership Management (Phase 4)', () => {
     }
   });
 
+  test('GET /api/v1/libraries search supports library name', async () => {
+    const res = await request(app).get('/api/v1/libraries?q=Greenwood');
+    assert.equal(res.status, 200);
+    assert.ok(Array.isArray(res.body.libraries));
+    assert.ok(res.body.libraries.length > 0);
+    assert.ok(res.body.libraries.some((l) => l.name.includes('Greenwood')));
+  });
+
+  test('GET /api/v1/libraries search supports locality / society via q parameter', async () => {
+    // Seeded library has society_locality = 'Greenwood Estate, Bellandur'
+    const res = await request(app).get('/api/v1/libraries?q=Bellandur');
+    assert.equal(res.status, 200);
+    assert.ok(Array.isArray(res.body.libraries));
+    assert.ok(res.body.libraries.length > 0);
+    assert.ok(res.body.libraries.some((l) => l.society_locality.includes('Bellandur')));
+  });
+
+  test('GET /api/v1/libraries search supports explicit locality filter with partial text', async () => {
+    const res = await request(app).get('/api/v1/libraries?locality=Estate');
+    assert.equal(res.status, 200);
+    assert.ok(Array.isArray(res.body.libraries));
+    assert.ok(res.body.libraries.length > 0);
+    assert.ok(res.body.libraries.some((l) => l.society_locality.includes('Estate')));
+  });
+
+  test('GET /api/v1/libraries search is case-insensitive', async () => {
+    const resLower = await request(app).get('/api/v1/libraries?q=bellandur');
+    const resUpper = await request(app).get('/api/v1/libraries?q=BELLANDUR');
+    assert.equal(resLower.status, 200);
+    assert.equal(resUpper.status, 200);
+    assert.equal(resLower.body.libraries.length, resUpper.body.libraries.length);
+    assert.ok(resLower.body.libraries.length > 0);
+  });
+
+  test('GET /api/v1/libraries search returns empty list for no results', async () => {
+    const res = await request(app).get('/api/v1/libraries?q=NonExistentLocality123456');
+    assert.equal(res.status, 200);
+    assert.ok(Array.isArray(res.body.libraries));
+    assert.equal(res.body.libraries.length, 0);
+    assert.equal(res.body.pagination.total, 0);
+  });
+
   test('POST /api/v1/libraries fails without authentication with 401', async () => {
     const res = await request(app)
       .post('/api/v1/libraries')

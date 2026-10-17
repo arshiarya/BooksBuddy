@@ -56,7 +56,7 @@ export function RulesTab({ library, onRulesUpdated }) {
           Configurable Borrowing & Queue Rules
         </h4>
         <p className="text-xs text-charcoal-muted mt-1">
-          Adjust loan periods, physical handover expiry limits, and member borrow quotas for this library.
+          Adjust borrow duration, physical handover expiry limits, and member borrow quotas for this library.
         </p>
       </div>
 
@@ -87,7 +87,7 @@ export function RulesTab({ library, onRulesUpdated }) {
               className="w-full px-3 py-2 text-xs rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-forest bg-white/90"
             />
             <p className="text-[11px] text-charcoal-muted mt-1">
-              Allowed loan period before due date ({rules.max_borrow_days || 14} days).
+              Allowed borrowing period before due date ({rules.max_borrow_days || 14} days).
             </p>
           </div>
 
@@ -108,7 +108,7 @@ export function RulesTab({ library, onRulesUpdated }) {
               className="w-full px-3 py-2 text-xs rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-forest bg-white/90"
             />
             <p className="text-[11px] text-charcoal-muted mt-1">
-              Time to meet & verify PIN before handover session expires ({rules.handover_window_hours || 48}h).
+              Time to meet & verify PIN before handover window expires ({rules.handover_window_hours || 48}h).
             </p>
           </div>
         </div>
@@ -130,7 +130,7 @@ export function RulesTab({ library, onRulesUpdated }) {
               }}
               className="w-full px-3 py-2 text-xs rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-forest bg-white/90"
             />
-            <p className="text-[11px] text-charcoal-muted mt-1">Simultaneous active loans per member.</p>
+            <p className="text-[11px] text-charcoal-muted mt-1">Simultaneous active books borrowed per member.</p>
           </div>
 
           <div>
@@ -149,7 +149,7 @@ export function RulesTab({ library, onRulesUpdated }) {
               }}
               className="w-full px-3 py-2 text-xs rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-forest bg-white/90"
             />
-            <p className="text-[11px] text-charcoal-muted mt-1">Permitted loan extensions if no waitlist.</p>
+            <p className="text-[11px] text-charcoal-muted mt-1">Permitted extensions if no waiting list.</p>
           </div>
         </div>
 

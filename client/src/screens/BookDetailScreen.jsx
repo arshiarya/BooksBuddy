@@ -133,7 +133,7 @@ export function BookDetailScreen({ libraryId, bookId }) {
     setActionLoading(true);
     try {
       const res = await borrowingApi.approveRequest(requestId);
-      showToast('Request approved! Handover session initiated.', 'success');
+      showToast('Request approved! Book handover initiated.', 'success');
       loadBookAndRequests();
     } catch (err) {
       showToast(err.message || 'Failed to approve request.', 'error');
@@ -160,7 +160,7 @@ export function BookDetailScreen({ libraryId, bookId }) {
 
   // Custodian Early Release
   const handleEarlyRelease = async () => {
-    if (!window.confirm('Ready to pass this book to the next waiting member? A new handover session will be generated.')) {
+    if (!window.confirm('Ready to pass this book to the next waiting member? A new book handover will be arranged.')) {
       return;
     }
 
@@ -267,15 +267,16 @@ export function BookDetailScreen({ libraryId, bookId }) {
           )}
 
           {/* Decentralized Physical Custody Details (Privacy-Safe) */}
+          {/* Decentralized Physical Custody Details (Privacy-Safe) */}
           <div className="p-4 rounded-2xl bg-[#FAF6EE] border border-[#E7D7C1] space-y-2 text-xs">
             <h4 className="font-bold text-charcoal flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-forest" />
-              Physical Custody & Location
+              Physical Location & Current Holder
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-muted">
               <div>
-                <span className="text-muted/70">Current Holder (Custodian): </span>
-                <strong className="text-charcoal">{isCustodian ? 'You (Current Custodian)' : book.current_custodian_name || book.custodian_name || 'Community Member'}</strong>
+                <span className="text-muted/70">Current Holder: </span>
+                <strong className="text-charcoal">{isCustodian ? 'You (Current Holder)' : book.current_custodian_name || book.custodian_name || 'Community Member'}</strong>
               </div>
               <div>
                 <span className="text-muted/70">Pickup Area: </span>
@@ -295,30 +296,54 @@ export function BookDetailScreen({ libraryId, bookId }) {
             </div>
           )}
 
-          {/* Borrowing / Handover CTAs */}
+          {/* Borrowing / Waiting List / Handover CTAs */}
           <div className="pt-4 border-t border-[#E7D7C1] space-y-4">
-            {/* If user is the borrower with an active/pending request */}
+            {/* If user has an active/pending/queued request */}
             {myActiveRequest ? (
               <div className="p-5 rounded-2xl bg-sage-tint/60 border border-sage-border/60 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-forest uppercase tracking-wider">
-                    Your Borrowing Request Status
+                    {myActiveRequest.status === 'QUEUED'
+                      ? "You're on the Waiting List"
+                      : myActiveRequest.status === 'HANDOVER_PENDING'
+                      ? 'Ready for Handover'
+                      : myActiveRequest.status === 'ACTIVE'
+                      ? 'Currently With Me'
+                      : 'Borrowing Request Status'}
                   </span>
                   <Badge variant="primary" size="sm">
                     {myActiveRequest.status}
                   </Badge>
                 </div>
 
-                <p className="text-xs text-forest">
-                  {myActiveRequest.status === 'CUSTODIAN_APPROVAL_PENDING' &&
-                    'Waiting for the current custodian to approve the handover.'}
-                  {myActiveRequest.status === 'QUEUED' &&
-                    `You are in the waiting queue. Position: #${myActiveRequest.queue_position || 1}.`}
-                  {myActiveRequest.status === 'HANDOVER_PENDING' &&
-                    'Request approved! Coordinate physical handover with the custodian.'}
-                  {myActiveRequest.status === 'ACTIVE' &&
-                    'You currently have this book borrowed.'}
-                </p>
+                {myActiveRequest.status === 'QUEUED' && (
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-forest">
+                      Position #{myActiveRequest.queue_position || 1}
+                    </p>
+                    <p className="text-xs text-forest/90">
+                      You are in line. You'll be notified automatically as soon as the book becomes ready for handover.
+                    </p>
+                  </div>
+                )}
+
+                {myActiveRequest.status === 'CUSTODIAN_APPROVAL_PENDING' && (
+                  <p className="text-xs text-forest">
+                    Waiting for the current custodian (holder) to approve the handover.
+                  </p>
+                )}
+
+                {myActiveRequest.status === 'HANDOVER_PENDING' && (
+                  <p className="text-xs text-forest">
+                    Request approved! Arrange book handover with the current holder.
+                  </p>
+                )}
+
+                {myActiveRequest.status === 'ACTIVE' && (
+                  <p className="text-xs text-forest">
+                    This book is currently with you. Enjoy reading!
+                  </p>
+                )}
 
                 <div className="flex flex-wrap gap-2 pt-2">
                   {myActiveRequest.status === 'HANDOVER_PENDING' && (
@@ -329,7 +354,7 @@ export function BookDetailScreen({ libraryId, bookId }) {
                       icon={KeyRound}
                       className="font-bold"
                     >
-                      Open Handover Verification
+                      Complete Handover
                     </Button>
                   )}
 
@@ -349,11 +374,11 @@ export function BookDetailScreen({ libraryId, bookId }) {
                 </div>
               </div>
             ) : isCustodian ? (
-              /* If user is the current custodian */
+              /* If user is the current holder */
               <div className="p-5 rounded-2xl bg-[#FAF6EE] border border-[#E7D7C1] space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-charcoal uppercase tracking-wider">
-                    You have physical custody of this book
+                    Currently With Me
                   </span>
                   <Badge variant="primary" size="sm">
                     In Your Possession
@@ -363,8 +388,8 @@ export function BookDetailScreen({ libraryId, bookId }) {
                 {book.status === 'BORROWED' && (
                   <div className="space-y-2">
                     <p className="text-xs text-muted leading-relaxed">
-                      Finished reading early? Release this book to immediately advance the waiting queue
-                      and pass it to the next neighbor.
+                      Finished reading early? Initiate early release to immediately advance the waiting list
+                      and pass the book to the next waiting neighbor.
                     </p>
                     <Button
                       variant="primary"
@@ -391,8 +416,35 @@ export function BookDetailScreen({ libraryId, bookId }) {
                 Request to Borrow Book
               </Button>
             ) : book.status === 'BORROWED' || book.status === 'RESERVED' ? (
-              /* Book currently borrowed: Join Waitlist (FIFO queue) */
-              <div className="space-y-2">
+              /* Book currently borrowed: Waiting List Flow */
+              <div className="space-y-4 p-5 rounded-2xl bg-[#FAF6EE] border border-[#E7D7C1]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider">
+                      Waiting List
+                    </h3>
+                    <p className="text-xs text-muted mt-0.5">
+                      {book.queue_length > 0
+                        ? `${book.queue_length} ${book.queue_length === 1 ? 'person is' : 'people are'} waiting`
+                        : 'No one is waiting yet. Be first in line!'}
+                    </p>
+                  </div>
+                  <Badge variant="warning" size="sm">
+                    Currently With {book.current_custodian_name || 'Member'}
+                  </Badge>
+                </div>
+
+                <div className="space-y-1.5 bg-[#F4ECE1]/60 p-3.5 rounded-xl border border-[#E7D7C1] text-xs text-muted">
+                  <p className="font-bold text-charcoal">What happens next:</p>
+                  <ol className="list-decimal list-inside space-y-1 text-[11px] text-muted leading-relaxed">
+                    <li>The current holder has the book.</li>
+                    <li>You move forward as others receive it.</li>
+                    <li>You'll be notified when it is your turn.</li>
+                    <li>Arrange the handover.</li>
+                    <li>Receive the book.</li>
+                  </ol>
+                </div>
+
                 <Button
                   variant="primary"
                   size="lg"
@@ -401,12 +453,8 @@ export function BookDetailScreen({ libraryId, bookId }) {
                   className="w-full sm:w-auto font-bold px-6 bg-[#6B8F71] hover:bg-[#5B7C60]"
                   icon={Clock}
                 >
-                  Join Waitlist (FIFO Queue)
+                  Join Waiting List
                 </Button>
-                <p className="text-[11px] text-muted">
-                  When the current loan finishes or an early release is initiated, the queue promotes the
-                  earliest queued member automatically.
-                </p>
               </div>
             ) : null}
 
@@ -446,7 +494,7 @@ export function BookDetailScreen({ libraryId, bookId }) {
                 >
                   <div>
                     <p className="font-bold text-charcoal">
-                      Borrower: {r.borrower_name || `Member #${r.borrower_id}`}
+                      Requested by: {r.borrower_name || `Member #${r.borrower_id}`}
                     </p>
                     <p className="text-[11px] text-muted">
                       Status: <strong className="text-forest">{r.status}</strong> &bull; Requested on{' '}
@@ -501,7 +549,7 @@ export function BookDetailScreen({ libraryId, bookId }) {
         <div className="bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] p-6 space-y-4 shadow-card">
           <h3 className="font-serif text-base font-bold text-charcoal flex items-center gap-2">
             <History className="w-4 h-4 text-forest" />
-            Custody Audit Chain
+            Custody History
           </h3>
           <div className="divide-y divide-[#E7D7C1] text-xs">
             {book.custody_history.map((hist, idx) => (
@@ -509,7 +557,7 @@ export function BookDetailScreen({ libraryId, bookId }) {
                 <div>
                   <span className="font-bold text-charcoal">{hist.action}</span>
                   <span className="text-muted/60"> &bull; </span>
-                  <span>Custodian: {hist.custodian_name || 'Member'}</span>
+                  <span>Holder: {hist.custodian_name || 'Member'}</span>
                   {hist.notes && <span className="text-muted/70 italic"> ({hist.notes})</span>}
                 </div>
                 <span className="text-[11px] text-muted whitespace-nowrap">

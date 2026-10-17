@@ -103,7 +103,10 @@ async function registerUser({
   const session = await createSession(newUser.id);
 
   return {
-    user: newUser,
+    user: {
+      ...newUser,
+      memberships: [],
+    },
     session,
   };
 }
@@ -144,8 +147,11 @@ async function loginUser({ email, password, currentSessionId }) {
   // Clean sensitive fields before returning
   delete user.password_hash;
 
+  // Retrieve full user profile with memberships so client context is immediately hydrated
+  const fullUser = await getUserWithMemberships(user.id);
+
   return {
-    user,
+    user: fullUser,
     session,
   };
 }

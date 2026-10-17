@@ -51,7 +51,7 @@ export function ConditionForm({
           Two-Sided Condition Confirmation
         </h4>
         <span className="text-[11px] font-medium text-charcoal-muted">
-          Role: <strong className="text-forest">{isGiver ? 'Current Custodian (Giver)' : 'Borrower (Receiver)'}</strong>
+          Role: <strong className="text-forest">{isGiver ? 'Current Holder (Giver)' : 'Receiver'}</strong>
         </span>
       </div>
 
@@ -64,7 +64,7 @@ export function ConditionForm({
             <Clock className="w-4 h-4 text-gold-600 shrink-0" />
           )}
           <div>
-            <p className="text-[11px] font-semibold text-charcoal">Custodian (Giver)</p>
+            <p className="text-[11px] font-semibold text-charcoal">Current Holder (Giver)</p>
             <p className="text-[10px] text-charcoal-muted">
               {giverConfirmedAt ? `Confirmed (${giverCondition})` : 'Pending confirmation'}
             </p>
@@ -78,7 +78,7 @@ export function ConditionForm({
             <Clock className="w-4 h-4 text-gold-600 shrink-0" />
           )}
           <div>
-            <p className="text-[11px] font-semibold text-charcoal">Borrower (Receiver)</p>
+            <p className="text-[11px] font-semibold text-charcoal">Receiver</p>
             <p className="text-[10px] text-charcoal-muted">
               {receiverConfirmedAt ? `Confirmed (${receiverCondition})` : 'Pending confirmation'}
             </p>
@@ -89,10 +89,14 @@ export function ConditionForm({
       {userConfirmed ? (
         <div className="p-3.5 rounded-xl bg-forest-50 border border-forest-200 text-forest-900 text-xs flex items-center gap-2">
           <Check className="w-4 h-4 text-forest shrink-0" />
-          <span>
-            You have already confirmed the book condition.
-            {!otherConfirmed && ' Waiting for the other party to confirm.'}
-          </span>
+          <div>
+            <p className="font-bold">Your confirmation is complete.</p>
+            <p className="text-[11px] text-forest-700">
+              {!otherConfirmed
+                ? 'Handover remains in progress until the other party confirms condition.'
+                : 'Both parties confirmed. Book handover is complete!'}
+            </p>
+          </div>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3 pt-1">
