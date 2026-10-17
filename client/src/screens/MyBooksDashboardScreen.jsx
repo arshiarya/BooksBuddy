@@ -13,13 +13,9 @@ import {
   MessageSquare,
   Clock,
   ArrowRight,
-  Sparkles,
   BookOpen,
   Calendar,
-  CheckCircle2,
-  XCircle,
   AlertCircle,
-  HelpCircle,
 } from 'lucide-react';
 
 export function MyBooksDashboardScreen() {
@@ -100,39 +96,39 @@ export function MyBooksDashboardScreen() {
   );
 
   return (
-    <div className="space-y-8 py-4 max-w-6xl mx-auto">
+    <div className="space-y-8 py-2 max-w-6xl mx-auto">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          My Shelf & Borrowing
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-charcoal tracking-tight">
+          My Shelf & Requests
         </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Manage your active borrowed books, waitlist queue status, and physical book handovers.
+        <p className="text-xs text-muted mt-1">
+          Manage your active borrowed books, waiting list status, and physical book handovers.
         </p>
       </div>
 
-      {/* Section 1: Urgent Incoming Custodian Action Requests */}
+      {/* ─── Section 1: Urgent Incoming Action Requests ─── */}
       {pendingCustodianActions.length > 0 && (
-        <div className="bg-amber-50/80 rounded-3xl border border-amber-200 p-6 space-y-4 shadow-xs">
+        <div className="bg-[#FAF4ED] rounded-3xl border border-[#E7C8AA] p-6 space-y-4 shadow-card">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-            <h2 className="text-sm font-bold text-amber-900 uppercase tracking-wider">
+            <AlertCircle className="w-5 h-5 text-gold shrink-0" />
+            <h2 className="text-xs font-bold text-[#8C5D23] uppercase tracking-wider">
               Handover Requests Requiring Your Action
             </h2>
           </div>
 
-          <div className="divide-y divide-amber-200/60">
+          <div className="divide-y divide-[#E7D7C1]/80">
             {pendingCustodianActions.map((item) => (
               <div
                 key={item.id}
                 className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-slate-900">{item.book_title}</h3>
-                  <p className="text-xs text-slate-600">
-                    Requested by <strong>{item.borrower_name}</strong> in {item.library_name}
+                  <h3 className="font-serif text-sm font-bold text-charcoal">{item.book_title}</h3>
+                  <p className="text-xs text-muted">
+                    Requested by <strong className="text-charcoal">{item.borrower_name}</strong> in {item.library_name}
                   </p>
-                  <p className="text-[11px] text-slate-500">
-                    Status: <strong className="text-amber-800">{item.status}</strong> &bull; Requested on{' '}
+                  <p className="text-[11px] text-muted">
+                    Status: <strong className="text-forest">{item.status}</strong> &bull; Requested on{' '}
                     {new Date(item.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -145,6 +141,7 @@ export function MyBooksDashboardScreen() {
                         size="sm"
                         onClick={() => handleApprove(item.id)}
                         loading={actionLoading}
+                        className="font-bold"
                       >
                         Approve Handover
                       </Button>
@@ -153,7 +150,7 @@ export function MyBooksDashboardScreen() {
                         size="sm"
                         onClick={() => handleDecline(item.id)}
                         loading={actionLoading}
-                        className="text-rose-600 hover:bg-rose-50"
+                        className="text-rose-700 hover:bg-rose-50 border-rose-200"
                       >
                         Decline
                       </Button>
@@ -167,14 +164,16 @@ export function MyBooksDashboardScreen() {
                         size="sm"
                         onClick={() => navigate(`/handover/${item.handover_session_id}`)}
                         icon={KeyRound}
+                        className="font-bold"
                       >
                         Open Handover PIN & Condition
                       </Button>
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={() => navigate(`/chat/${item.id}`)}
                         icon={MessageSquare}
+                        className="font-semibold"
                       >
                         Chat
                       </Button>
@@ -187,14 +186,14 @@ export function MyBooksDashboardScreen() {
         </div>
       )}
 
-      {/* Section 2: My Borrow Requests & Active Loans */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-xs">
+      {/* ─── Section 2: Currently With Me & My Requests ─── */}
+      <div className="bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] p-6 sm:p-7 space-y-4 shadow-card">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <BookMarked className="w-5 h-5 text-brand-600" />
-            My Borrow Requests & Active Loans
+          <h2 className="font-serif text-lg font-bold text-charcoal flex items-center gap-2">
+            <BookMarked className="w-5 h-5 text-forest" />
+            Currently With Me & My Requests
           </h2>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-muted font-semibold">
             {data.asBorrower.length} total
           </span>
         </div>
@@ -202,13 +201,13 @@ export function MyBooksDashboardScreen() {
         {data.asBorrower.length === 0 ? (
           <EmptyState
             icon={BookMarked}
-            title="No active borrowing requests"
+            title="No active requests"
             description="You haven't requested any books yet. Explore your neighborhood catalogue!"
-            actionText="Browse Libraries"
+            actionText="Explore Libraries"
             onAction={() => navigate('/')}
           />
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-[#E7D7C1]">
             {data.asBorrower.map((req) => {
               const isHandoverReady = req.status === 'HANDOVER_PENDING' && req.handover_session_id;
 
@@ -221,19 +220,20 @@ export function MyBooksDashboardScreen() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3
                         onClick={() => navigate(`/library/${req.library_id}/book/${req.book_id}`)}
-                        className="text-sm font-bold text-slate-900 hover:text-brand-600 cursor-pointer transition-colors"
+                        className="font-serif text-sm font-bold text-charcoal hover:text-forest cursor-pointer transition-colors"
                       >
                         {req.book_title}
                       </h3>
                       <BorrowStatusBadge status={req.status} queuePosition={req.queue_position} size="sm" />
                     </div>
 
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted">
                       by {req.book_author} &bull; Library: {req.library_name}
                     </p>
 
                     {req.due_date && req.status === 'ACTIVE' && (
-                      <p className="text-[11px] text-emerald-700 font-medium">
+                      <p className="text-[11px] text-forest font-semibold flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" />
                         Due Date: {new Date(req.due_date).toLocaleDateString()}
                       </p>
                     )}
@@ -246,6 +246,7 @@ export function MyBooksDashboardScreen() {
                         size="sm"
                         onClick={() => navigate(`/handover/${req.handover_session_id}`)}
                         icon={KeyRound}
+                        className="font-bold"
                       >
                         Verify Handover
                       </Button>
@@ -253,10 +254,11 @@ export function MyBooksDashboardScreen() {
 
                     {['HANDOVER_PENDING', 'ACTIVE'].includes(req.status) && (
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={() => navigate(`/chat/${req.id}`)}
                         icon={MessageSquare}
+                        className="font-semibold"
                       >
                         Chat
                       </Button>
@@ -268,7 +270,7 @@ export function MyBooksDashboardScreen() {
                         size="sm"
                         onClick={() => handleCancel(req.id)}
                         loading={actionLoading}
-                        className="text-slate-400 hover:text-rose-600"
+                        className="text-muted hover:text-rose-700 hover:bg-rose-50"
                       >
                         Cancel
                       </Button>
@@ -281,40 +283,41 @@ export function MyBooksDashboardScreen() {
         )}
       </div>
 
-      {/* Section 3: Books in My Physical Possession */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-xs">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-brand-600" />
-            Books Currently in My Physical Custody
-          </h2>
-          <span className="text-xs text-slate-400">
-            {data.inCustody.length} on your shelf
-          </span>
-        </div>
+      {/* ─── Section 3: Books in Your Custody ─── */}
+      <div className="bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] p-6 sm:p-7 space-y-4 shadow-card">
+        <h2 className="font-serif text-lg font-bold text-charcoal flex items-center gap-2">
+          <BookOpen className="w-5 h-5 text-forest" />
+          Books in Your Physical Custody
+        </h2>
+        <p className="text-xs text-muted">
+          Books you have donated or borrowed that currently sit on your physical shelf.
+        </p>
 
         {data.inCustody.length === 0 ? (
-          <EmptyState
-            icon={BookOpen}
-            title="No books currently in your custody"
-            description="Books you donate or borrow will appear here while they rest on your personal bookshelf."
-          />
+          <p className="text-xs text-muted/70 italic py-2">
+            You currently hold no books on your physical shelf.
+          </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
             {data.inCustody.map((book) => (
               <div
                 key={book.id}
                 onClick={() => navigate(`/library/${book.library_id}/book/${book.id}`)}
-                className="p-4 rounded-2xl border border-slate-200 hover:border-brand-400 cursor-pointer transition-all hover:shadow-xs space-y-2 bg-slate-50/50"
+                className="p-4 rounded-2xl bg-[#FAF6EE] border border-[#E7D7C1] hover:border-forest/40 hover:shadow-xs cursor-pointer transition-all space-y-2"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <h4 className="text-sm font-bold text-slate-900 line-clamp-1">{book.title}</h4>
-                  <Badge variant={book.status === 'AVAILABLE' ? 'success' : 'warning'} size="sm">
+                  <h4 className="font-serif text-sm font-bold text-charcoal line-clamp-1">{book.title}</h4>
+                  <Badge variant="primary" size="sm">
                     {book.status}
                   </Badge>
                 </div>
-                <p className="text-xs text-slate-500">by {book.author}</p>
-                <p className="text-[11px] text-slate-400 truncate">Library: {book.library_name}</p>
+                <p className="text-xs text-muted line-clamp-1">by {book.author}</p>
+                <div className="text-[11px] text-muted flex items-center justify-between pt-1 border-t border-[#E7D7C1]">
+                  <span>Condition: {book.condition || 'GOOD'}</span>
+                  <span className="text-forest font-semibold flex items-center gap-1">
+                    View <ArrowRight className="w-3 h-3" />
+                  </span>
+                </div>
               </div>
             ))}
           </div>

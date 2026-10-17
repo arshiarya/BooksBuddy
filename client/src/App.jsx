@@ -5,6 +5,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { LoadingSpinner, EmptyState } from './components/common/EmptyState';
+import { OnboardingTour } from './components/common/OnboardingTour';
+import { BuddyHelpWidget } from './components/common/BuddyHelpWidget';
 import { LoginScreen } from './screens/LoginScreen';
 import { RegisterScreen } from './screens/RegisterScreen';
 import { LibrariesDiscoveryScreen } from './screens/LibrariesDiscoveryScreen';
@@ -148,12 +150,16 @@ export default function App() {
     <ToastProvider>
       <NavigationProvider>
         <AuthProvider>
-          <div className="min-h-screen bg-slate-50 flex flex-col justify-between text-slate-900 font-sans selection:bg-brand-100 selection:text-brand-900">
+          <div className="min-h-screen bg-[#F6F1E7] flex flex-col justify-between text-[#2E2E2E] font-sans selection:bg-[#EDF6EC] selection:text-[#1B4332]">
             <Navbar />
             <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
               <AppRouter />
             </main>
             <Footer />
+            {/* First-Time User Onboarding Guide */}
+            <OnboardingTour />
+            {/* Corner Help Widget */}
+            <BuddyHelpWidget />
           </div>
         </AuthProvider>
       </NavigationProvider>

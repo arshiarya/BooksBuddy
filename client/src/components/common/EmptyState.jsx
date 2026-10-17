@@ -12,13 +12,15 @@ export function EmptyState({
   className = '',
 }) {
   return (
-    <div className={`flex flex-col items-center justify-center text-center p-8 sm:p-12 rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 ${className}`}>
-      <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 mb-4 shadow-sm">
-        <Icon className="w-6 h-6 text-slate-500" />
+    <div
+      className={`flex flex-col items-center justify-center text-center p-8 sm:p-12 rounded-3xl border border-dashed border-[#DDCFC0] bg-[#FAF7F2] ${className}`}
+    >
+      <div className="w-14 h-14 rounded-2xl bg-[#F4ECE1] border border-[#DDCFC0] flex items-center justify-center text-[#1B4332] mb-4 shadow-xs">
+        <Icon className="w-7 h-7 text-[#1B4332]" />
       </div>
-      <h4 className="text-base font-semibold text-slate-900">{title}</h4>
+      <h4 className="font-serif text-lg font-bold text-charcoal">{title}</h4>
       {description && (
-        <p className="text-xs text-slate-500 max-w-sm mt-1 mb-6 leading-relaxed">
+        <p className="text-xs text-muted max-w-sm mt-1.5 mb-6 leading-relaxed">
           {description}
         </p>
       )}
@@ -39,13 +41,13 @@ export function LoadingSpinner({ text = 'Loading...', size = 'md' }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 gap-3 text-slate-500">
+    <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted">
       <div
-        className={`animate-spin rounded-full border-brand-500 border-t-transparent ${
+        className={`animate-spin rounded-full border-[#1B4332] border-t-transparent ${
           sizeClasses[size] || sizeClasses.md
         }`}
       />
-      {text && <p className="text-xs font-medium text-slate-500 animate-pulse">{text}</p>}
+      {text && <p className="text-xs font-semibold text-muted animate-pulse">{text}</p>}
     </div>
   );
 }

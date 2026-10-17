@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { librariesApi } from '../api/libraries.api';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '../context/NavigationContext';
@@ -6,7 +6,22 @@ import { useToast } from '../context/ToastContext';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 import { EmptyState, LoadingSpinner } from '../components/common/EmptyState';
-import { Library, Search, Plus, MapPin, Users, BookOpen, Key, ArrowRight, ShieldCheck, Clock } from 'lucide-react';
+import {
+  Library,
+  Search,
+  Plus,
+  MapPin,
+  Users,
+  BookOpen,
+  ArrowRight,
+  ShieldCheck,
+  Clock,
+  Compass,
+  BookPlus,
+  BookHeart,
+  KeyRound,
+  Sparkles,
+} from 'lucide-react';
 
 export function LibrariesDiscoveryScreen() {
   const { user, isMemberOf, getMembership, refreshUser } = useAuth();
@@ -20,6 +35,9 @@ export function LibrariesDiscoveryScreen() {
   const [selectedLibraryToJoin, setSelectedLibraryToJoin] = useState(null);
   const [inviteCodeInput, setInviteCodeInput] = useState('');
   const [joining, setJoining] = useState(false);
+
+  const discoverySectionRef = useRef(null);
+  const howItWorksSectionRef = useRef(null);
 
   const loadLibraries = async (query = '') => {
     setLoading(true);
@@ -40,6 +58,14 @@ export function LibrariesDiscoveryScreen() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     loadLibraries(searchQuery);
+  };
+
+  const scrollToDiscovery = () => {
+    discoverySectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToHowItWorks = () => {
+    howItWorksSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleJoinSubmit = async (e) => {
@@ -67,230 +93,328 @@ export function LibrariesDiscoveryScreen() {
   };
 
   return (
-    <div className="space-y-8 py-4">
-      {/* Hero Header */}
-      <div className="relative rounded-3xl bg-gradient-to-r from-brand-800 via-brand-700 to-emerald-800 p-8 sm:p-12 text-white overflow-hidden shadow-sm">
-        <div className="relative z-10 max-w-2xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 backdrop-blur-sm border border-white/20 text-emerald-200">
-            <ShieldCheck className="w-4 h-4 text-emerald-300" />
-            Hyperlocal Virtual Communities
+    <div className="space-y-12 py-2">
+      {/* ─── Hero Section: Value Proposition ─── */}
+      <section className="relative rounded-3xl bg-[#1B4332] text-[#F6F1E7] p-8 sm:p-12 lg:p-16 overflow-hidden shadow-card border border-[#143527]">
+        {/* Subtle decorative background pattern */}
+        <div
+          className="absolute inset-0 opacity-5 pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(#F6F1E7 1.5px, transparent 1.5px)`,
+            backgroundSize: '24px 24px',
+          }}
+        />
+
+        {/* Ambient warm gradient highlight */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#6B8F71]/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 max-w-2xl space-y-5">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/10 backdrop-blur-xs border border-white/20 text-[#FAF7F2]">
+            <ShieldCheck className="w-4 h-4 text-[#8EAE93]" />
+            Hyperlocal Community Library
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
-            Discover Neighborhood Libraries Near You
-          </h2>
+          <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-[#FAF7F2] leading-[1.15]">
+            Borrow Books From Your Community
+          </h1>
 
-          <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed max-w-xl">
-            Borrow, donate, and exchange books directly with trusted neighbors. Books stay on personal
-            bookshelves until borrowed, secured with one-time verification PINs.
+          <p className="text-sm sm:text-base text-[#D8E5DD] leading-relaxed max-w-xl">
+            BooksBuddy connects people in the same society or locality so they can share books,
+            discover new reads, and keep books circulating within their community.
           </p>
 
-          <div className="pt-2 flex flex-wrap gap-3">
+          <div className="pt-3 flex flex-wrap items-center gap-3">
+            <Button
+              variant="white"
+              size="md"
+              onClick={scrollToDiscovery}
+              className="shadow-md font-bold px-6 py-2.5"
+            >
+              Explore Libraries
+            </Button>
+
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={scrollToHowItWorks}
+              className="bg-transparent text-[#FAF7F2] border-white/40 hover:bg-white/10 hover:border-white font-semibold px-5"
+            >
+              How It Works
+            </Button>
+
             {user ? (
               <Button
-                variant="primary"
+                variant="ghost"
                 size="md"
                 onClick={() => navigate('/library/new')}
-                className="bg-white text-brand-900 hover:bg-slate-100 shadow-sm"
                 icon={Plus}
+                className="text-[#FAF7F2] hover:bg-white/10 font-semibold"
               >
                 Create a New Library
               </Button>
-            ) : (
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => navigate('/register')}
-                className="bg-white text-brand-900 hover:bg-slate-100 shadow-sm"
-              >
-                Get Started
-              </Button>
-            )}
+            ) : null}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Search & Discovery Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by library name, society, or city..."
-            className="w-full pl-10 pr-4 py-2.5 text-xs rounded-2xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white shadow-xs"
+      {/* ─── How It Works: 4 Clean Steps ─── */}
+      <section ref={howItWorksSectionRef} className="space-y-6 pt-2">
+        <div className="text-center max-w-xl mx-auto space-y-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-forest bg-sage-tint px-3 py-1 rounded-full border border-sage-border/50">
+            Simple & Transparent
+          </span>
+          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-charcoal">
+            How BooksBuddy Works
+          </h2>
+          <p className="text-xs sm:text-sm text-muted">
+            Four simple steps to borrow and share physical books with trusted neighbors.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Step 1 */}
+          <div className="bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] p-6 space-y-3 relative hover:-translate-y-1 transition-transform duration-200 shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-sage-tint text-forest flex items-center justify-center font-bold text-sm border border-sage-border/60">
+              1
+            </div>
+            <h3 className="font-serif text-base font-bold text-charcoal">
+              Join a Library
+            </h3>
+            <p className="text-xs text-muted leading-relaxed">
+              Find and join a trusted local community library in your apartment, society, or locality.
+            </p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] p-6 space-y-3 relative hover:-translate-y-1 transition-transform duration-200 shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-sage-tint text-forest flex items-center justify-center font-bold text-sm border border-sage-border/60">
+              2
+            </div>
+            <h3 className="font-serif text-base font-bold text-charcoal">
+              Discover or Add Books
+            </h3>
+            <p className="text-xs text-muted leading-relaxed">
+              Browse your neighborhood collection or share a book you have finished from your bookshelf.
+            </p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] p-6 space-y-3 relative hover:-translate-y-1 transition-transform duration-200 shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-sage-tint text-forest flex items-center justify-center font-bold text-sm border border-sage-border/60">
+              3
+            </div>
+            <h3 className="font-serif text-base font-bold text-charcoal">
+              Request a Book
+            </h3>
+            <p className="text-xs text-muted leading-relaxed">
+              Send a request to the current holder or join the waiting list for high-demand titles.
+            </p>
+          </div>
+
+          {/* Step 4 */}
+          <div className="bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] p-6 space-y-3 relative hover:-translate-y-1 transition-transform duration-200 shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-sage-tint text-forest flex items-center justify-center font-bold text-sm border border-sage-border/60">
+              4
+            </div>
+            <h3 className="font-serif text-base font-bold text-charcoal">
+              Complete Handover
+            </h3>
+            <p className="text-xs text-muted leading-relaxed">
+              Meet safely in your community and verify the handover using a secure one-time PIN.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Search & Discovery Header ─── */}
+      <section ref={discoverySectionRef} className="space-y-6 pt-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-charcoal tracking-tight">
+              Community Libraries
+            </h2>
+            <p className="text-xs text-muted mt-0.5">
+              Found <strong>{libraries.length}</strong> {libraries.length === 1 ? 'library' : 'libraries'} near you
+            </p>
+          </div>
+
+          {/* Search Bar */}
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-muted" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by library name, society, or city..."
+              className="w-full pl-10 pr-4 py-2.5 text-xs rounded-2xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-[#FDFBF7] text-charcoal shadow-xs placeholder:text-muted/70"
+            />
+          </form>
+        </div>
+
+        {/* ─── Libraries Grid ─── */}
+        {loading ? (
+          <LoadingSpinner text="Searching libraries..." />
+        ) : libraries.length === 0 ? (
+          <EmptyState
+            icon={Library}
+            title="No libraries found"
+            description={
+              searchQuery
+                ? `No library matched "${searchQuery}". Try searching for another locality or create a new library.`
+                : 'There are no active community libraries yet. Be the first to start one in your locality!'
+            }
+            actionText="Create a New Library"
+            onAction={() => navigate(user ? '/library/new' : '/login')}
           />
-        </form>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {libraries.map((lib) => {
+              const membership = getMembership(lib.id);
+              const isApproved = membership?.status === 'APPROVED';
+              const isPending = membership?.status === 'PENDING';
 
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <span>Found <strong>{libraries.length}</strong> libraries</span>
-        </div>
-      </div>
+              return (
+                <div
+                  key={lib.id}
+                  className="group bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] p-6 flex flex-col justify-between gap-6 hover:shadow-card-hover hover:border-forest/40 transition-all duration-200"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-sage-tint text-forest flex items-center justify-center font-bold text-base shrink-0 group-hover:scale-105 transition-transform border border-sage-border/50">
+                        <Library className="w-6 h-6" />
+                      </div>
 
-      {/* Libraries Grid */}
-      {loading ? (
-        <LoadingSpinner text="Searching libraries..." />
-      ) : libraries.length === 0 ? (
-        <EmptyState
-          icon={Library}
-          title="No libraries found"
-          description={
-            searchQuery
-              ? `No library matched "${searchQuery}". Try a different locality or start one!`
-              : 'There are no active community libraries yet. Be the first to start one!'
-          }
-          actionText="Create a New Library"
-          onAction={() => navigate(user ? '/library/new' : '/login')}
-        />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {libraries.map((lib) => {
-            const membership = getMembership(lib.id);
-            const isApproved = membership?.status === 'APPROVED';
-            const isPending = membership?.status === 'PENDING';
-
-            return (
-              <div
-                key={lib.id}
-                className="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between gap-6 hover:shadow-md hover:border-brand-300 transition-all duration-200 group"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center font-bold text-base shrink-0 group-hover:scale-105 transition-transform">
-                      <Library className="w-6 h-6" />
+                      {isApproved ? (
+                        <Badge variant="success" size="sm">
+                          Member ({membership.role})
+                        </Badge>
+                      ) : isPending ? (
+                        <Badge variant="warning" size="sm">
+                          <Clock className="w-3 h-3" /> Application Pending
+                        </Badge>
+                      ) : null}
                     </div>
 
+                    <div>
+                      <h3 className="font-serif text-lg font-bold text-charcoal group-hover:text-forest transition-colors line-clamp-1">
+                        {lib.name}
+                      </h3>
+                      <div className="flex items-center gap-1.5 text-xs text-muted font-medium mt-1">
+                        <MapPin className="w-3.5 h-3.5 text-muted/70 shrink-0" />
+                        <span className="truncate">{lib.society_locality}, {lib.city}</span>
+                      </div>
+                    </div>
+
+                    {lib.description && (
+                      <p className="text-xs text-muted line-clamp-2 leading-relaxed">
+                        {lib.description}
+                      </p>
+                    )}
+
+                    <div className="flex items-center gap-4 text-xs text-muted pt-1">
+                      <span className="flex items-center gap-1.5">
+                        <BookOpen className="w-3.5 h-3.5 text-forest" />
+                        <strong>{lib.total_books || 0}</strong> books
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-muted/70" />
+                        <strong>{lib.member_count || 1}</strong> members
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-[#E7D7C1]">
                     {isApproved ? (
-                      <Badge variant="success" size="sm">
-                        Member ({membership.role})
-                      </Badge>
+                      <Button
+                        variant="primary"
+                        size="md"
+                        onClick={() => navigate(`/library/${lib.id}`)}
+                        className="w-full font-semibold"
+                        icon={ArrowRight}
+                      >
+                        Enter Library
+                      </Button>
                     ) : isPending ? (
-                      <Badge variant="warning" size="sm">
-                        <Clock className="w-3 h-3" /> Application Pending
-                      </Badge>
-                    ) : null}
-                  </div>
-
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-1">
-                      {lib.name}
-                    </h3>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium mt-1">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{lib.society_locality}, {lib.city}</span>
-                    </div>
-                  </div>
-
-                  {lib.description && (
-                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                      {lib.description}
-                    </p>
-                  )}
-
-                  <div className="flex items-center gap-4 text-xs text-slate-500 pt-1">
-                    <span className="flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-brand-600" />
-                      <strong>{lib.total_books || 0}</strong> books
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-slate-400" />
-                      <strong>{lib.member_count || 1}</strong> members
-                    </span>
+                      <Button
+                        variant="outline"
+                        size="md"
+                        disabled
+                        className="w-full text-[#8C5D23] bg-[#FAF4ED] border-[#E7C8AA] cursor-default font-semibold"
+                      >
+                        Awaiting Approval
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        onClick={() => setSelectedLibraryToJoin(lib)}
+                        className="w-full font-semibold"
+                      >
+                        Request to Join
+                      </Button>
+                    )}
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
-                <div className="pt-4 border-t border-slate-100">
-                  {isApproved ? (
-                    <Button
-                      variant="primary"
-                      size="md"
-                      onClick={() => navigate(`/library/${lib.id}`)}
-                      className="w-full"
-                      icon={ArrowRight}
-                    >
-                      Enter Library
-                    </Button>
-                  ) : isPending ? (
-                    <Button
-                      variant="outline"
-                      size="md"
-                      disabled
-                      className="w-full text-amber-700 bg-amber-50 border-amber-200 cursor-default"
-                    >
-                      Awaiting Approval
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="md"
-                      onClick={() => setSelectedLibraryToJoin(lib)}
-                      className="w-full hover:bg-brand-50 hover:text-brand-700 hover:border-brand-300"
-                    >
-                      Request to Join
-                    </Button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Join Request Modal */}
+      {/* ─── Join Request Modal ─── */}
       {selectedLibraryToJoin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4 animate-in fade-in-0 zoom-in-95">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center">
-                <Library className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F291E]/50 backdrop-blur-xs">
+          <div className="bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] shadow-2xl max-w-md w-full p-6 sm:p-8 space-y-5 animate-in fade-in-0 zoom-in-95">
+            <div className="flex items-center gap-3 pb-3 border-b border-[#E7D7C1]">
+              <div className="w-11 h-11 rounded-2xl bg-sage-tint text-forest flex items-center justify-center shrink-0">
+                <Library className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">
+                <h3 className="font-serif text-lg font-bold text-charcoal">
                   Join {selectedLibraryToJoin.name}
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted">
                   {selectedLibraryToJoin.society_locality}, {selectedLibraryToJoin.city}
                 </p>
               </div>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Your membership application will be sent to the library librarians for verification.
-              If your community shares an invite code, enter it below to expedite approval.
+            <p className="text-xs text-muted leading-relaxed">
+              BooksBuddy communities are neighborhood-verified. When you submit your application,
+              the primary librarian will review and approve your membership.
             </p>
 
             <form onSubmit={handleJoinSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Invitation Code (Optional)
+                <label className="block text-xs font-bold text-charcoal mb-1">
+                  Invitation Code <span className="text-muted font-normal">(Optional)</span>
                 </label>
-                <div className="relative">
-                  <Key className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                  <input
-                    type="text"
-                    value={inviteCodeInput}
-                    onChange={(e) => setInviteCodeInput(e.target.value)}
-                    placeholder="e.g. BB-9X72"
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono uppercase"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={inviteCodeInput}
+                  onChange={(e) => setInviteCodeInput(e.target.value.toUpperCase())}
+                  placeholder="e.g. LIB-A1B2C3"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-white font-mono uppercase"
+                />
+                <p className="text-[11px] text-muted mt-1">
+                  If a neighbor shared an invite code, enter it above to expedite your membership.
+                </p>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2.5 pt-3">
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="ghost"
+                  size="md"
                   onClick={() => setSelectedLibraryToJoin(null)}
-                  disabled={joining}
                 >
                   Cancel
                 </Button>
                 <Button
-                  type="submit"
                   variant="primary"
-                  size="sm"
+                  size="md"
+                  type="submit"
                   loading={joining}
+                  className="font-bold px-5"
                 >
                   Submit Application
                 </Button>

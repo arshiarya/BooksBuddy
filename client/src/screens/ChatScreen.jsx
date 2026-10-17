@@ -49,13 +49,13 @@ export function ChatScreen({ requestId }) {
   const otherPartyName = isBorrower ? request.custodian_name : request.borrower_name;
 
   return (
-    <div className="max-w-3xl mx-auto py-6 px-4 space-y-4 h-[calc(100vh-8rem)] flex flex-col">
+    <div className="max-w-3xl mx-auto py-4 px-4 space-y-4 h-[calc(100vh-8rem)] flex flex-col">
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate('/my-books')}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-muted hover:text-forest transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to My Shelf
+          <ArrowLeft className="w-4 h-4" /> Back to My Shelf & Requests
         </button>
 
         {request.handover_session?.id && (
@@ -64,6 +64,7 @@ export function ChatScreen({ requestId }) {
             size="sm"
             onClick={() => navigate(`/handover/${request.handover_session.id}`)}
             icon={KeyRound}
+            className="font-bold"
           >
             Handover Verification
           </Button>

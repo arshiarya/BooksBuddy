@@ -44,8 +44,8 @@ export function RemoveBookModal({ isOpen, onClose, book, onSuccess }) {
       maxWidth="max-w-md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 p-3.5 rounded-xl bg-terracotta-50 border border-terracotta-200 text-terracotta-900 text-xs">
+          <AlertTriangle className="w-5 h-5 text-terracotta shrink-0 mt-0.5" />
           <p className="leading-relaxed">
             Removing this book marks it as <strong>REMOVED</strong>. It will no longer be available
             for borrowing. Historical custody records remain preserved.
@@ -53,13 +53,13 @@ export function RemoveBookModal({ isOpen, onClose, book, onSuccess }) {
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+          <div className="p-3 rounded-xl bg-terracotta-50 border border-terracotta-200 text-terracotta-800 text-xs">
             {error}
           </div>
         )}
 
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
+          <label className="block text-xs font-semibold text-charcoal mb-1">
             Removal Reason *
           </label>
           <textarea
@@ -68,11 +68,11 @@ export function RemoveBookModal({ isOpen, onClose, book, onSuccess }) {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="e.g. Lost, severe water damage, donor request..."
-            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500"
+            className="w-full px-3 py-2 text-xs rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-terracotta bg-white/90"
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+        <div className="flex justify-end gap-3 pt-3 border-t border-beige-200">
           <Button variant="outline" size="md" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>

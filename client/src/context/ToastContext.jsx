@@ -25,27 +25,27 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {/* Toast Notification Container */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-4 pointer-events-none">
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2.5 max-w-sm w-full px-4 pointer-events-none">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-lg text-sm transition-all duration-200 animate-in slide-in-from-bottom-2 ${
+            className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-2xl border shadow-card-hover text-sm transition-all duration-200 animate-in slide-in-from-bottom-2 ${
               toast.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                ? 'bg-[#EDF6EC] border-[#B2CCBD] text-[#1B4332]'
                 : toast.type === 'error'
-                ? 'bg-rose-50 border-rose-200 text-rose-900'
-                : 'bg-slate-900 border-slate-800 text-white'
+                ? 'bg-[#FAF0ED] border-[#E8BDB1] text-[#A8452D]'
+                : 'bg-[#FDFBF7] border-[#DDCFC0] text-[#2E2E2E]'
             }`}
           >
-            {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />}
-            {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />}
-            {toast.type === 'info' && <Info className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />}
+            {toast.type === 'success' && <CheckCircle2 className="w-5 h-5 text-[#1B4332] shrink-0 mt-0.5" />}
+            {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-[#C97B63] shrink-0 mt-0.5" />}
+            {toast.type === 'info' && <Info className="w-5 h-5 text-[#1B4332] shrink-0 mt-0.5" />}
 
-            <div className="flex-1 font-medium text-xs leading-relaxed">{toast.message}</div>
+            <div className="flex-1 font-semibold text-xs leading-relaxed">{toast.message}</div>
 
             <button
               onClick={() => removeToast(toast.id)}
-              className="p-1 rounded-md opacity-70 hover:opacity-100 transition-opacity"
+              className="p-1 rounded-lg text-muted hover:text-charcoal hover:bg-[#F2EDE4] transition-colors"
               aria-label="Close notification"
             >
               <X className="w-4 h-4" />

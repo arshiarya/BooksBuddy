@@ -56,9 +56,14 @@ export const communityApi = {
   },
 
   async createNotice(libraryId, data) {
+    const payload = {
+      ...data,
+      description: data.description || data.content,
+      contact_info: data.contact_info || 'Community Member',
+    };
     return apiRequest(`/api/v1/community/${libraryId}/notices`, {
       method: 'POST',
-      body: data,
+      body: payload,
     });
   },
 

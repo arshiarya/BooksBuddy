@@ -48,29 +48,29 @@ export function CreateLibraryScreen() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-6 px-4">
+    <div className="max-w-2xl mx-auto py-4 px-4">
       <button
         onClick={() => navigate('/')}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors mb-4"
+        className="inline-flex items-center gap-1.5 text-xs font-bold text-muted hover:text-forest transition-colors mb-4"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Libraries
       </button>
 
-      <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
+      <div className="bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] p-6 sm:p-8 shadow-card space-y-6">
         <div>
-          <div className="inline-flex w-12 h-12 rounded-2xl bg-brand-50 text-brand-700 items-center justify-center mb-3">
+          <div className="inline-flex w-12 h-12 rounded-2xl bg-sage-tint text-forest items-center justify-center mb-3 border border-sage-border/60">
             <Library className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-charcoal tracking-tight">
             Found a Community Virtual Library
-          </h2>
-          <p className="text-xs text-slate-500 mt-1">
+          </h1>
+          <p className="text-xs text-muted mt-1 leading-relaxed">
             Establish a shared catalogue for your apartment complex, housing society, or neighborhood.
           </p>
         </div>
 
-        <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-brand-50/70 border border-brand-200 text-brand-900 text-xs">
-          <ShieldCheck className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-sage-tint border border-sage-border text-forest text-xs">
+          <ShieldCheck className="w-5 h-5 text-forest shrink-0 mt-0.5" />
           <p className="leading-relaxed">
             As the founder, you will be appointed as the <strong>Primary Librarian</strong>, granting
             you full authority to configure loan periods, approve members, appoint co-librarians, and
@@ -79,91 +79,88 @@ export function CreateLibraryScreen() {
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs leading-relaxed animate-in fade-in-0">
+          <div className="p-3.5 rounded-xl bg-[#FAF0ED] border border-[#E8BDB1] text-[#A8452D] text-xs leading-relaxed animate-in fade-in-0">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-              1. Basic Information
-            </h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-charcoal mb-1">
+              Library Name *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g. Palm Meadows Community Library"
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-white text-charcoal"
+            />
+          </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Library Name *
+              <label className="block text-xs font-bold text-charcoal mb-1">
+                Society or Locality *
               </label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g. Palm Meadows Community Library"
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Society / Locality *
-                </label>
-                <div className="relative">
-                  <Building className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                  <input
-                    type="text"
-                    required
-                    value={formData.society_locality}
-                    onChange={(e) => setFormData({ ...formData, society_locality: e.target.value })}
-                    placeholder="e.g. Palm Meadows"
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  City *
-                </label>
-                <div className="relative">
-                  <MapPin className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                  <input
-                    type="text"
-                    required
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    placeholder="e.g. Bengaluru"
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
-                  />
-                </div>
+              <div className="relative">
+                <Building className="w-4 h-4 absolute left-3 top-3 text-muted" />
+                <input
+                  type="text"
+                  required
+                  value={formData.society_locality}
+                  onChange={(e) =>
+                    setFormData({ ...formData, society_locality: e.target.value })
+                  }
+                  placeholder="e.g. Palm Meadows, Bellandur"
+                  className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-white text-charcoal"
+                />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Library Description
+              <label className="block text-xs font-bold text-charcoal mb-1">
+                City *
               </label>
-              <textarea
-                rows={2}
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Share a welcoming note or focus of this library..."
-                className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
-              />
+              <div className="relative">
+                <MapPin className="w-4 h-4 absolute left-3 top-3 text-muted" />
+                <input
+                  type="text"
+                  required
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  placeholder="e.g. Bengaluru"
+                  className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-white text-charcoal"
+                />
+              </div>
             </div>
           </div>
 
-          <div className="space-y-4 pt-4 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Sliders className="w-4 h-4 text-brand-600" />
-              2. Initial Borrowing & Queue Rules
-            </h3>
+          <div>
+            <label className="block text-xs font-bold text-charcoal mb-1">
+              Welcome Description <span className="text-muted font-normal">(Optional)</span>
+            </label>
+            <textarea
+              rows={2}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Share a welcoming note for your neighbors..."
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-white text-charcoal"
+            />
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Configurable Library Rules */}
+          <div className="pt-2 border-t border-[#E7D7C1] space-y-3">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-charcoal uppercase tracking-wider">
+              <Sliders className="w-4 h-4 text-forest" />
+              Initial Borrowing Rules
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Max Borrow Duration (Days) *
+                <label className="block text-[11px] font-bold text-charcoal mb-1">
+                  Loan (Days)
                 </label>
                 <input
                   type="number"
@@ -172,18 +169,15 @@ export function CreateLibraryScreen() {
                   required
                   value={formData.max_borrow_days}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      max_borrow_days: parseInt(e.target.value, 10) || 1,
-                    })
+                    setFormData({ ...formData, max_borrow_days: parseInt(e.target.value) || 14 })
                   }
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-white text-charcoal font-semibold"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Handover Window (Hours) *
+                <label className="block text-[11px] font-bold text-charcoal mb-1">
+                  Handover (Hours)
                 </label>
                 <input
                   type="number"
@@ -194,38 +188,36 @@ export function CreateLibraryScreen() {
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      handover_window_hours: parseInt(e.target.value, 10) || 1,
+                      handover_window_hours: parseInt(e.target.value) || 48,
                     })
                   }
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-white text-charcoal font-semibold"
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Max Books Per Member *
+                <label className="block text-[11px] font-bold text-charcoal mb-1">
+                  Book Limit
                 </label>
                 <input
                   type="number"
                   min="1"
-                  max="20"
+                  max="10"
                   required
                   value={formData.max_books_per_member}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      max_books_per_member: parseInt(e.target.value, 10) || 1,
+                      max_books_per_member: parseInt(e.target.value) || 3,
                     })
                   }
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-white text-charcoal font-semibold"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Max Allowed Renewals *
+                <label className="block text-[11px] font-bold text-charcoal mb-1">
+                  Max Renewals
                 </label>
                 <input
                   type="number"
@@ -234,33 +226,23 @@ export function CreateLibraryScreen() {
                   required
                   value={formData.max_renewals}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      max_renewals: parseInt(e.target.value, 10) || 0,
-                    })
+                    setFormData({ ...formData, max_renewals: parseInt(e.target.value) || 0 })
                   }
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50/50"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-white text-charcoal font-semibold"
                 />
               </div>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
-            <Button
-              variant="outline"
-              size="md"
-              onClick={() => navigate('/')}
-              disabled={submitting}
-            >
-              Cancel
-            </Button>
+          <div className="pt-2">
             <Button
               type="submit"
               variant="primary"
-              size="md"
+              size="lg"
               loading={submitting}
+              className="w-full font-bold"
             >
-              Found Library
+              Create Community Library
             </Button>
           </div>
         </form>

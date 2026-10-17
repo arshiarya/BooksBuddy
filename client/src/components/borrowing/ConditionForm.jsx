@@ -45,27 +45,27 @@ export function ConditionForm({
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-4 shadow-xs">
+    <div className="p-5 rounded-2xl bg-white/90 backdrop-blur-xs border border-beige-300 space-y-4 shadow-warm">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+        <h4 className="text-xs font-bold text-forest uppercase tracking-wider">
           Two-Sided Condition Confirmation
         </h4>
-        <span className="text-[11px] font-medium text-slate-500">
-          Role: <strong className="text-brand-700">{isGiver ? 'Current Custodian (Giver)' : 'Borrower (Receiver)'}</strong>
+        <span className="text-[11px] font-medium text-charcoal-muted">
+          Role: <strong className="text-forest">{isGiver ? 'Current Custodian (Giver)' : 'Borrower (Receiver)'}</strong>
         </span>
       </div>
 
       {/* Two-Sided Status Badges */}
-      <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+      <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-ivory/60 border border-beige-300">
         <div className="flex items-center gap-2">
           {giverConfirmedAt ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-forest shrink-0" />
           ) : (
-            <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+            <Clock className="w-4 h-4 text-gold-600 shrink-0" />
           )}
           <div>
-            <p className="text-[11px] font-semibold text-slate-900">Custodian (Giver)</p>
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[11px] font-semibold text-charcoal">Custodian (Giver)</p>
+            <p className="text-[10px] text-charcoal-muted">
               {giverConfirmedAt ? `Confirmed (${giverCondition})` : 'Pending confirmation'}
             </p>
           </div>
@@ -73,13 +73,13 @@ export function ConditionForm({
 
         <div className="flex items-center gap-2">
           {receiverConfirmedAt ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-forest shrink-0" />
           ) : (
-            <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+            <Clock className="w-4 h-4 text-gold-600 shrink-0" />
           )}
           <div>
-            <p className="text-[11px] font-semibold text-slate-900">Borrower (Receiver)</p>
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[11px] font-semibold text-charcoal">Borrower (Receiver)</p>
+            <p className="text-[10px] text-charcoal-muted">
               {receiverConfirmedAt ? `Confirmed (${receiverCondition})` : 'Pending confirmation'}
             </p>
           </div>
@@ -87,8 +87,8 @@ export function ConditionForm({
       </div>
 
       {userConfirmed ? (
-        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-center gap-2">
-          <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="p-3.5 rounded-xl bg-forest-50 border border-forest-200 text-forest-900 text-xs flex items-center gap-2">
+          <Check className="w-4 h-4 text-forest shrink-0" />
           <span>
             You have already confirmed the book condition.
             {!otherConfirmed && ' Waiting for the other party to confirm.'}
@@ -97,13 +97,13 @@ export function ConditionForm({
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3 pt-1">
           {error && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+            <div className="p-3 rounded-xl bg-terracotta-50 border border-terracotta-200 text-terracotta-800 text-xs">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-charcoal mb-1">
               Physical Condition Rating *
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -114,8 +114,8 @@ export function ConditionForm({
                   onClick={() => setRating(cond)}
                   className={`py-2 text-xs font-semibold rounded-xl border transition-all ${
                     rating === cond
-                      ? 'bg-brand-600 text-white border-brand-600 shadow-xs'
-                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      ? 'bg-forest text-ivory border-forest shadow-xs font-bold'
+                      : 'bg-ivory/60 text-charcoal border-beige-300 hover:bg-beige-200'
                   }`}
                 >
                   {cond}
@@ -125,7 +125,7 @@ export function ConditionForm({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-charcoal mb-1">
               Condition Notes (Optional)
             </label>
             <textarea
@@ -133,7 +133,7 @@ export function ConditionForm({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Clean pages, slight spine wear..."
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-forest bg-white/90"
             />
           </div>
 

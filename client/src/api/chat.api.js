@@ -16,4 +16,8 @@ export const chatApi = {
       body: { message_text: text, content: text },
     });
   },
+
+  async sendMessage(borrowRequestId, text) {
+    return this.postMessage(borrowRequestId, text);
+  },
 };

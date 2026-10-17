@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { BookOpen, Library, BookMarked, Plus, LogIn, LogOut, User, Menu, X, Shield } from 'lucide-react';
+import { Compass, BookMarked, Plus, LogIn, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigation } from '../../context/NavigationContext';
 import { Button } from '../common/Button';
+import { Logo } from '../common/Logo';
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -15,7 +16,7 @@ export function Navbar() {
   };
 
   const navLinks = [
-    { name: 'Discover Libraries', path: '/', icon: Library },
+    { name: 'Explore Libraries', path: '/', icon: Compass },
     ...(user
       ? [
           { name: 'My Shelf & Requests', path: '/my-books', icon: BookMarked },
@@ -24,32 +25,19 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+    <header className="sticky top-0 z-40 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-[#DDCFC0] shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Brand Logo */}
-          <div
+        <div className="flex items-center justify-between h-16 sm:h-18">
+          {/* BooksBuddy Brand Identity Logo */}
+          <Logo
+            variant="full"
+            size="md"
             onClick={() => navigate('/')}
-            className="flex items-center gap-3 cursor-pointer group select-none"
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-500 text-white flex items-center justify-center shadow-sm shadow-brand-500/20 group-hover:scale-105 transition-transform">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                BooksBuddy
-                <span className="text-[10px] uppercase tracking-wider font-semibold bg-brand-100 text-brand-800 px-1.5 py-0.5 rounded">
-                  PWA
-                </span>
-              </span>
-              <p className="text-[11px] text-slate-500 font-medium -mt-0.5">
-                Community-Based Virtual Library
-              </p>
-            </div>
-          </div>
+            className="py-1"
+          />
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1.5" aria-label="Main Navigation">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = currentPath === link.path;
@@ -57,43 +45,45 @@ export function Navbar() {
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-150 ${
                     isActive
-                      ? 'bg-brand-50 text-brand-700 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      ? 'bg-[#1B4332] text-[#FAF7F2] shadow-xs'
+                      : 'text-charcoal hover:text-forest hover:bg-[#F2EDE4]'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4 shrink-0" />
                   {link.name}
                 </button>
               );
             })}
           </nav>
 
-          {/* User Controls / Desktop Auth */}
+          {/* Desktop User Controls / Auth */}
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3">
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   onClick={() => navigate('/library/new')}
                   icon={Plus}
+                  className="font-semibold"
                 >
                   New Library
                 </Button>
 
-                <div className="h-6 w-px bg-slate-200" />
+                <div className="h-6 w-px bg-[#DDCFC0]" />
 
+                {/* User Pill */}
                 <div className="flex items-center gap-2.5 pl-1">
-                  <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-800 flex items-center justify-center font-bold text-xs border border-brand-200">
+                  <div className="w-8 h-8 rounded-full bg-forest text-ivory flex items-center justify-center font-serif font-bold text-xs shadow-xs border border-forest/30">
                     {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                   </div>
                   <div className="text-left">
-                    <p className="text-xs font-semibold text-slate-900 leading-tight">
+                    <p className="text-xs font-bold text-charcoal leading-tight">
                       {user.fullName}
                     </p>
-                    <p className="text-[10px] text-slate-500 font-medium">
+                    <p className="text-[10px] text-muted font-medium truncate max-w-[140px]">
                       {user.societyLocality || user.city || user.email}
                     </p>
                   </div>
@@ -105,7 +95,7 @@ export function Navbar() {
                   onClick={handleLogout}
                   icon={LogOut}
                   title="Sign out"
-                  className="text-slate-500 hover:text-rose-600"
+                  className="text-muted hover:text-rose-700 hover:bg-rose-50"
                 >
                   Logout
                 </Button>
@@ -117,6 +107,7 @@ export function Navbar() {
                   size="sm"
                   onClick={() => navigate('/login')}
                   icon={LogIn}
+                  className="font-semibold"
                 >
                   Sign In
                 </Button>
@@ -124,6 +115,7 @@ export function Navbar() {
                   variant="primary"
                   size="sm"
                   onClick={() => navigate('/register')}
+                  className="font-semibold"
                 >
                   Join BooksBuddy
                 </Button>
@@ -135,7 +127,7 @@ export function Navbar() {
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              className="p-2 rounded-xl text-charcoal hover:bg-[#F2EDE4] transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -146,8 +138,8 @@ export function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-4 animate-in slide-in-from-top-2">
-          <nav className="flex flex-col gap-1">
+        <div className="md:hidden border-t border-[#DDCFC0] bg-[#FDFBF7] px-4 pt-3 pb-6 space-y-4 animate-in slide-in-from-top-2">
+          <nav className="flex flex-col gap-1.5" aria-label="Mobile Navigation">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = currentPath === link.path;
@@ -158,13 +150,13 @@ export function Navbar() {
                     navigate(link.path);
                     setMobileMenuOpen(false);
                   }}
-                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold ${
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-bold ${
                     isActive
-                      ? 'bg-brand-50 text-brand-700'
-                      : 'text-slate-700 hover:bg-slate-50'
+                      ? 'bg-[#1B4332] text-[#FAF7F2]'
+                      : 'text-charcoal hover:bg-[#F2EDE4]'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4 shrink-0" />
                   {link.name}
                 </button>
               );
@@ -175,60 +167,61 @@ export function Navbar() {
                   navigate('/library/new');
                   setMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-bold text-charcoal hover:bg-[#F2EDE4]"
               >
-                <Plus className="w-4 h-4 text-brand-600" />
+                <Plus className="w-4 h-4 text-forest" />
                 Create a Library
               </button>
             )}
           </nav>
 
-          <div className="pt-3 border-t border-slate-100">
+          <div className="pt-3 border-t border-[#E7D7C1]">
             {user ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3 px-3">
-                  <div className="w-9 h-9 rounded-full bg-brand-100 text-brand-800 flex items-center justify-center font-bold text-sm">
+                  <div className="w-9 h-9 rounded-full bg-forest text-ivory flex items-center justify-center font-serif font-bold text-sm">
                     {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">{user.fullName}</p>
-                    <p className="text-xs text-slate-500">{user.email}</p>
+                    <p className="text-sm font-bold text-charcoal">{user.fullName}</p>
+                    <p className="text-xs text-muted">{user.email}</p>
                   </div>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    handleLogout();
-                    setMobileMenuOpen(false);
-                  }}
+                  onClick={handleLogout}
                   icon={LogOut}
-                  className="w-full text-rose-600 hover:bg-rose-50"
+                  title="Sign out"
+                  className="w-full justify-center text-rose-700 border-rose-200 hover:bg-rose-50"
                 >
                   Sign Out
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col gap-2">
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="md"
                   onClick={() => {
                     navigate('/login');
                     setMobileMenuOpen(false);
                   }}
+                  icon={LogIn}
+                  className="w-full justify-center"
                 >
                   Sign In
                 </Button>
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="md"
                   onClick={() => {
                     navigate('/register');
                     setMobileMenuOpen(false);
                   }}
+                  className="w-full justify-center"
                 >
-                  Register
+                  Join BooksBuddy
                 </Button>
               </div>
             )}

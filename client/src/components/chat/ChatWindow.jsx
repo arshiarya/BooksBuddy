@@ -3,7 +3,7 @@ import { chatApi } from '../../api/chat.api';
 import { getSocket } from '../../services/socket';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../common/Button';
-import { LoadingSpinner } from '../common/LoadingSpinner';
+import { LoadingSpinner } from '../common/EmptyState';
 import { Send, MessageSquare, Radio } from 'lucide-react';
 
 export function ChatWindow({ borrowRequestId, recipientName, bookTitle, className = '' }) {
@@ -58,7 +58,6 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
         const reqId = msg.borrowRequestId ?? msg.borrow_request_id;
         if (Number(reqId) === Number(borrowRequestId)) {
           setMessages((prev) => {
-            // Avoid duplicate message appending
             if (prev.some((m) => m.id === msg.id)) return prev;
             return [...prev, msg];
           });
@@ -99,59 +98,67 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
       socket.emit('send_message', {
         borrowRequestId: Number(borrowRequestId),
         messageText: text,
+        content: text,
       });
       sentViaSocket = true;
     }
 
-    // If socket wasn't connected, fallback to REST API
-    if (!sentViaSocket) {
-      try {
+    try {
+      if (!sentViaSocket) {
         const res = await chatApi.postMessage(borrowRequestId, text);
         const msg = res.chatMessage || res.message;
         if (msg) {
           setMessages((prev) => [...prev, msg]);
           setTimeout(scrollToBottom, 50);
         }
-      } catch (err) {
-        console.error('Failed to send message via REST fallback:', err);
       }
+    } catch (err) {
+      console.error('Failed to send message via HTTP:', err);
+    } finally {
+      setSending(false);
     }
-
-    setSending(false);
   };
 
   return (
-    <div className={`flex flex-col h-full bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden ${className}`}>
-      {/* Header */}
-      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs">
-            <MessageSquare className="w-4 h-4" />
+    <div
+      className={`bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] flex flex-col overflow-hidden shadow-card ${className}`}
+    >
+      {/* Chat Header */}
+      <div className="p-4 bg-[#FAF6EE] border-b border-[#E7D7C1] flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-sage-tint text-forest flex items-center justify-center font-bold">
+            <MessageSquare className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-slate-900 leading-tight">
-              {recipientName ? `Chat with ${recipientName}` : 'Handover Coordination'}
-            </h4>
-            <p className="text-[10px] text-slate-500 truncate max-w-[200px] sm:max-w-xs">
-              Regarding: <em>{bookTitle}</em>
-            </p>
+            <h3 className="font-serif text-sm font-bold text-charcoal">
+              Coordinating with {recipientName || 'Neighbor'}
+            </h3>
+            {bookTitle && (
+              <p className="text-[11px] text-muted">
+                Book: <strong className="text-charcoal">{bookTitle}</strong>
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
-          <Radio className={`w-3.5 h-3.5 ${isConnected ? 'text-emerald-500 animate-pulse' : 'text-slate-400'}`} />
-          <span className="hidden sm:inline">{isConnected ? 'Live' : 'Polling'}</span>
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-muted bg-white px-2.5 py-1 rounded-full border border-[#DDCFC0]">
+          <span
+            className={`w-2 h-2 rounded-full ${
+              isConnected ? 'bg-forest animate-pulse' : 'bg-muted/50'
+            }`}
+          />
+          {isConnected ? 'Real-time' : 'Connecting'}
         </div>
       </div>
 
-      {/* Messages Feed */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-3 min-h-[240px] max-h-[420px] bg-slate-50/40">
+      {/* Message List */}
+      <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#FAF7F2]/60 min-h-[300px]">
         {loading ? (
           <LoadingSpinner text="Loading messages..." size="sm" />
         ) : messages.length === 0 ? (
-          <div className="text-center py-10 text-slate-400 text-xs">
-            <p className="font-semibold text-slate-600 mb-1">No messages yet.</p>
-            <p>Coordinate safe meetup place & time for your book handover.</p>
+          <div className="text-center py-10 text-muted text-xs space-y-1">
+            <p className="font-bold text-charcoal">No messages yet.</p>
+            <p>Coordinate a safe meetup place & time for your physical book handover.</p>
           </div>
         ) : (
           messages.map((msg) => {
@@ -166,22 +173,24 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
                 className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
               >
                 <div className="flex items-center gap-1.5 mb-1 px-1">
-                  <span className="text-[10px] font-semibold text-slate-500">
+                  <span className="text-[10px] font-bold text-charcoal">
                     {isMe ? 'You' : senderName}
                   </span>
-                  <span className="text-[9px] text-slate-400">
-                    {timeStr ? new Date(timeStr).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }) : ''}
+                  <span className="text-[9px] text-muted">
+                    {timeStr
+                      ? new Date(timeStr).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : ''}
                   </span>
                 </div>
 
                 <div
-                  className={`max-w-[85%] sm:max-w-md px-3.5 py-2 rounded-2xl text-xs leading-relaxed shadow-xs ${
+                  className={`max-w-[85%] sm:max-w-md px-4 py-2.5 rounded-2xl text-xs leading-relaxed shadow-xs ${
                     isMe
-                      ? 'bg-brand-600 text-white rounded-br-xs'
-                      : 'bg-white text-slate-800 border border-slate-200 rounded-bl-xs'
+                      ? 'bg-forest text-ivory rounded-br-xs font-medium'
+                      : 'bg-white text-charcoal border border-[#DDCFC0] rounded-bl-xs'
                   }`}
                 >
                   {contentText}
@@ -194,13 +203,13 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
       </div>
 
       {/* Input Composer */}
-      <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-slate-200 flex gap-2">
+      <form onSubmit={handleSendMessage} className="p-3 bg-[#FDFBF7] border-t border-[#E7D7C1] flex gap-2">
         <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           placeholder="Type a message to coordinate meetup..."
-          className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50"
+          className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-[#DDCFC0] focus:outline-none focus:ring-2 focus:ring-forest bg-white text-charcoal"
           disabled={sending}
         />
         <Button
@@ -210,6 +219,7 @@ export function ChatWindow({ borrowRequestId, recipientName, bookTitle, classNam
           disabled={!inputText.trim() || sending}
           loading={sending}
           icon={Send}
+          className="font-bold px-4"
         >
           Send
         </Button>

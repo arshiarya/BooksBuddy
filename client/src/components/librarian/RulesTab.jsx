@@ -49,19 +49,19 @@ export function RulesTab({ library, onRulesUpdated }) {
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6 max-w-2xl">
+    <div className="bg-white/90 backdrop-blur-xs p-6 rounded-2xl border border-beige-300 shadow-warm space-y-6 max-w-2xl">
       <div>
-        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-brand-600" />
+        <h4 className="font-serif text-base font-bold text-forest flex items-center gap-2">
+          <Sliders className="w-4 h-4 text-forest-light" />
           Configurable Borrowing & Queue Rules
         </h4>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-charcoal-muted mt-1">
           Adjust loan periods, physical handover expiry limits, and member borrow quotas for this library.
         </p>
       </div>
 
-      <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-900 text-xs">
-        <Info className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-ivory/80 border border-beige-300 text-charcoal text-xs">
+        <Info className="w-4 h-4 text-forest shrink-0 mt-0.5" />
         <p className="leading-relaxed">
           <strong>Dynamic rule enforcement:</strong> These parameters dictate borrowing deadlines,
           queue reservation windows, and automated handover PIN expirations.
@@ -71,7 +71,7 @@ export function RulesTab({ library, onRulesUpdated }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-charcoal mb-1">
               Max Borrow Duration (Days)
             </label>
             <input
@@ -84,15 +84,15 @@ export function RulesTab({ library, onRulesUpdated }) {
                 const val = e.target.value.replace(/\D/g, '');
                 setRules({ ...rules, max_borrow_days: val ? parseInt(val, 10) : '' });
               }}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-forest bg-white/90"
             />
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-[11px] text-charcoal-muted mt-1">
               Allowed loan period before due date ({rules.max_borrow_days || 14} days).
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-charcoal mb-1">
               Handover Window (Hours)
             </label>
             <input
@@ -105,9 +105,9 @@ export function RulesTab({ library, onRulesUpdated }) {
                 const val = e.target.value.replace(/\D/g, '');
                 setRules({ ...rules, handover_window_hours: val ? parseInt(val, 10) : '' });
               }}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-forest bg-white/90"
             />
-            <p className="text-[11px] text-slate-400 mt-1">
+            <p className="text-[11px] text-charcoal-muted mt-1">
               Time to meet & verify PIN before handover session expires ({rules.handover_window_hours || 48}h).
             </p>
           </div>
@@ -115,7 +115,7 @@ export function RulesTab({ library, onRulesUpdated }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-charcoal mb-1">
               Max Active Books Per Member
             </label>
             <input
@@ -128,13 +128,13 @@ export function RulesTab({ library, onRulesUpdated }) {
                 const val = e.target.value.replace(/\D/g, '');
                 setRules({ ...rules, max_books_per_member: val ? parseInt(val, 10) : '' });
               }}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-forest bg-white/90"
             />
-            <p className="text-[11px] text-slate-400 mt-1">Simultaneous active loans per member.</p>
+            <p className="text-[11px] text-charcoal-muted mt-1">Simultaneous active loans per member.</p>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label className="block text-xs font-semibold text-charcoal mb-1">
               Max Allowed Renewals
             </label>
             <input
@@ -147,13 +147,13 @@ export function RulesTab({ library, onRulesUpdated }) {
                 const val = e.target.value.replace(/\D/g, '');
                 setRules({ ...rules, max_renewals: val ? parseInt(val, 10) : 0 });
               }}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-forest bg-white/90"
             />
-            <p className="text-[11px] text-slate-400 mt-1">Permitted loan extensions if no waitlist.</p>
+            <p className="text-[11px] text-charcoal-muted mt-1">Permitted loan extensions if no waitlist.</p>
           </div>
         </div>
 
-        <div className="pt-3 border-t border-slate-100 flex justify-end">
+        <div className="pt-3 border-t border-beige-200 flex justify-end">
           <Button
             type="submit"
             variant="primary"

@@ -98,41 +98,42 @@ export function HandoverScreen({ sessionId }) {
   const displayPin = session.pin || localPin;
 
   return (
-    <div className="max-w-3xl mx-auto py-6 px-4 space-y-6">
+    <div className="max-w-3xl mx-auto py-4 px-4 space-y-6">
       <button
         onClick={() => navigate('/my-books')}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-bold text-muted hover:text-forest transition-colors"
       >
-        <ArrowLeft className="w-4 h-4" /> Back to My Shelf
+        <ArrowLeft className="w-4 h-4" /> Back to My Shelf & Requests
       </button>
 
       {/* Main Header */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
+      <div className="bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] p-6 sm:p-8 shadow-card space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center font-bold">
+          <div className="flex items-center gap-3.5">
+            <div className="w-13 h-13 rounded-2xl bg-sage-tint text-forest flex items-center justify-center font-bold border border-sage-border/60">
               <KeyRound className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                <h1 className="font-serif text-xl sm:text-2xl font-bold text-charcoal tracking-tight">
                   Handover Verification
                 </h1>
                 <Badge variant={isCompleted ? 'success' : 'info'} size="sm">
                   {isCompleted ? 'COMPLETED' : session.status}
                 </Badge>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Book: <strong>{session.book_title}</strong>
+              <p className="text-xs text-muted mt-0.5">
+                Book: <strong className="text-charcoal">{session.book_title}</strong>
               </p>
             </div>
           </div>
 
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => navigate(`/chat/${session.borrow_request_id}`)}
             icon={MessageSquare}
+            className="font-semibold"
           >
             Open Chat
           </Button>
@@ -140,12 +141,12 @@ export function HandoverScreen({ sessionId }) {
 
         {/* Success Completion Banner */}
         {isCompleted && (
-          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
-            <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-emerald-800">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="p-4 rounded-2xl bg-sage-tint border border-sage-border text-forest space-y-1">
+            <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-forest">
+              <CheckCircle2 className="w-5 h-5 text-forest shrink-0" />
               Handover & Custody Transfer Complete!
             </div>
-            <p className="text-xs text-emerald-700">
+            <p className="text-xs text-forest/90 leading-relaxed">
               Both parties verified the one-time PIN and confirmed the physical book condition. The
               borrowing request is now officially <strong>ACTIVE</strong>.
             </p>
@@ -154,15 +155,15 @@ export function HandoverScreen({ sessionId }) {
 
         {/* Authorized Address Reveal (Shown to borrower during active handover) */}
         {isReceiver && (session.pickup_address || session.giver_address) && (
-          <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-sky-900 space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-sky-800">
-              <ShieldCheck className="w-4 h-4 text-sky-600 shrink-0" />
+          <div className="p-4 rounded-2xl bg-[#FAF4ED] border border-[#E7C8AA] text-[#8C5D23] space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#8C5D23]">
+              <ShieldCheck className="w-4 h-4 text-forest shrink-0" />
               Authorized Pickup Address & Contact
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               <div>
-                <span className="text-sky-700 font-medium">Pickup Location: </span>
-                <strong className="text-slate-900">
+                <span className="text-muted font-medium">Pickup Location: </span>
+                <strong className="text-charcoal font-bold">
                   {session.pickup_address?.flat_house_number || session.giver_address},{' '}
                   {session.pickup_address?.society_locality || session.giver_locality}
                   {(session.pickup_address?.city || session.giver_city)
@@ -172,14 +173,14 @@ export function HandoverScreen({ sessionId }) {
               </div>
               {(session.pickup_address?.phone || session.giver_phone) && (
                 <div>
-                  <span className="text-sky-700 font-medium">Custodian Phone: </span>
-                  <strong className="text-slate-900 font-mono">
+                  <span className="text-muted font-medium">Custodian Phone: </span>
+                  <strong className="text-charcoal font-mono">
                     {session.pickup_address?.phone || session.giver_phone}
                   </strong>
                 </div>
               )}
             </div>
-            <p className="text-[11px] text-sky-600 italic pt-1">
+            <p className="text-[11px] text-muted italic pt-1">
               Protected address revealed exclusively to you as the authorized borrower for this handover.
             </p>
           </div>
@@ -187,11 +188,11 @@ export function HandoverScreen({ sessionId }) {
 
         {/* Handover Window Expiry Reminder */}
         {session.expires_at && !isCompleted && (
-          <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
-            <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-muted bg-[#FAF6EE] p-3 rounded-xl border border-[#E7D7C1]">
+            <Clock className="w-4 h-4 text-gold shrink-0" />
             <span>
-              Handover expires on:{' '}
-              <strong>{new Date(session.expires_at).toLocaleString()}</strong>
+              Handover window expires on:{' '}
+              <strong className="text-charcoal">{new Date(session.expires_at).toLocaleString()}</strong>
             </span>
           </div>
         )}

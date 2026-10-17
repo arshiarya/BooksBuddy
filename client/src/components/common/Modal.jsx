@@ -22,34 +22,34 @@ export function Modal({ isOpen, onClose, title, description, children, maxWidth 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-      {/* Backdrop */}
+      {/* Warm Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-[#0F291E]/50 backdrop-blur-xs transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Modal Dialog */}
       <div
-        className={`relative bg-white rounded-2xl border border-slate-200 shadow-xl w-full ${maxWidth} p-6 overflow-hidden z-10 animate-in fade-in-0 zoom-in-95 duration-150`}
+        className={`relative bg-[#FDFBF7] rounded-3xl border border-[#DDCFC0] shadow-2xl w-full ${maxWidth} p-6 sm:p-8 overflow-hidden z-10 animate-in fade-in-0 zoom-in-95 duration-150`}
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
+        <div className="flex items-start justify-between gap-4 pb-4 border-b border-[#E7D7C1]">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h3>
-            {description && <p className="text-xs text-slate-500 mt-1">{description}</p>}
+            <h3 className="font-serif text-xl font-bold text-charcoal tracking-tight">{title}</h3>
+            {description && <p className="text-xs text-muted mt-1 leading-relaxed">{description}</p>}
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-xl text-muted hover:text-charcoal hover:bg-[#F2EDE4] transition-colors"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="pt-4">{children}</div>
+        <div className="pt-5">{children}</div>
       </div>
     </div>
   );

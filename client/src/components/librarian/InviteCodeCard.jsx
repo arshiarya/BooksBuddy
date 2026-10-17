@@ -4,17 +4,19 @@ import { useToast } from '../../context/ToastContext';
 import { Button } from '../common/Button';
 import { Key, Copy, RefreshCw, Check } from 'lucide-react';
 
-export function InviteCodeCard({ libraryId, initialInviteCode, onCodeRegenerated }) {
+export function InviteCodeCard({ libraryId, initialInviteCode, inviteCode: propInviteCode, onCodeRegenerated }) {
   const { showToast } = useToast();
-  const [inviteCode, setInviteCode] = useState(initialInviteCode || '');
+  const effectiveCode = initialInviteCode || propInviteCode || '';
+  const [inviteCode, setInviteCode] = useState(effectiveCode);
   const [copied, setCopied] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
   useEffect(() => {
-    if (initialInviteCode) {
-      setInviteCode(initialInviteCode);
+    const code = initialInviteCode || propInviteCode;
+    if (code) {
+      setInviteCode(code);
     }
-  }, [initialInviteCode]);
+  }, [initialInviteCode, propInviteCode]);
 
   const handleCopy = () => {
     if (!inviteCode) return;
@@ -44,31 +46,31 @@ export function InviteCodeCard({ libraryId, initialInviteCode, onCodeRegenerated
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4 max-w-md">
+    <div className="bg-white/90 backdrop-blur-xs p-6 rounded-2xl border border-beige-300 shadow-warm space-y-4 max-w-md">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-          <Key className="w-4 h-4 text-brand-600" />
+        <h4 className="font-serif text-base font-bold text-forest flex items-center gap-2">
+          <Key className="w-4 h-4 text-gold-600" />
           Library Private Invite Code
         </h4>
       </div>
 
-      <p className="text-xs text-slate-500 leading-relaxed">
+      <p className="text-xs text-charcoal-muted leading-relaxed">
         Share this secret code with neighborhood residents so they can apply to join this library.
         Only librarians can see this code.
       </p>
 
       <div className="flex items-center gap-2">
-        <div className="flex-1 font-mono text-base font-bold text-slate-900 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl tracking-wider select-all">
+        <div className="flex-1 font-mono text-base font-bold text-forest bg-ivory/80 border border-beige-300 px-4 py-2.5 rounded-xl tracking-wider select-all shadow-inner">
           {inviteCode || '••••••••'}
         </div>
 
         <button
           onClick={handleCopy}
-          className="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-colors"
+          className="p-2.5 rounded-xl border border-beige-300 bg-white hover:bg-ivory text-charcoal-muted hover:text-forest transition-colors"
           title="Copy invite code"
           aria-label="Copy invite code"
         >
-          {copied ? <Check className="w-5 h-5 text-emerald-600" /> : <Copy className="w-5 h-5" />}
+          {copied ? <Check className="w-5 h-5 text-forest" /> : <Copy className="w-5 h-5" />}
         </button>
 
         <Button

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Rounded Background Tile -->
+  <rect width="64" height="64" rx="16" fill="#1B4332" />
+  
+  <!-- Subtle inner glow ring -->
+  <rect x="2" y="2" width="60" height="60" rx="14" stroke="#6B8F71" stroke-opacity="0.3" stroke-width="1.5" />
+
+  <!-- Open Book Pages (Warm Ivory) -->
+  <!-- Left Page -->
+  <path d="M32 46C26.5 42 19 41.5 13 43V20C19 18.5 26.5 19 32 23V46Z" fill="#F6F1E7" />
+  <path d="M13 20C19 18.5 26.5 19 32 23V46C26.5 42 19 41.5 13 43V20Z" stroke="#E7D7C1" stroke-width="1.2" />
+
+  <!-- Right Page -->
+  <path d="M32 46C37.5 42 45 41.5 51 43V20C45 18.5 37.5 19 32 23V46Z" fill="#FAF7F2" />
+  <path d="M51 20C45 18.5 37.5 19 32 23V46C37.5 42 45 41.5 51 43V20Z" stroke="#E7D7C1" stroke-width="1.2" />
+
+  <!-- Book Spine Shadow -->
+  <path d="M32 23V46" stroke="#D4A373" stroke-width="1.5" stroke-linecap="round" />
+
+  <!-- Sprouting Leaf / Community Motif (Sage Green & Terracotta bud) -->
+  <!-- Central Leaf Stem -->
+  <path d="M32 25C32 18 32 13 32 11" stroke="#6B8F71" stroke-width="2" stroke-linecap="round" />
+  
+  <!-- Left Sprout Leaf -->
+  <path d="M32 18C28 17 24 13 25 9C29 9 32 13 32 18Z" fill="#8EAE93" />
+  
+  <!-- Right Sprout Leaf -->
+  <path d="M32 15C36 14 39 10 38 6C34 6 32 10 32 15Z" fill="#6B8F71" />
+
+  <!-- Golden Bookmark Ribbon -->
+  <path d="M32 46V51L34.5 49L37 51V46H32Z" fill="#D4A373" />
+</svg>

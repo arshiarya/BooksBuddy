@@ -8,13 +8,13 @@ export function LoadingSpinner({ text = 'Loading...', size = 'md' }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 gap-3 text-slate-500">
+    <div className="flex flex-col items-center justify-center py-12 gap-3 text-charcoal-muted">
       <div
-        className={`animate-spin rounded-full border-brand-500 border-t-transparent ${
+        className={`animate-spin rounded-full border-forest border-t-transparent ${
           sizeClasses[size] || sizeClasses.md
         }`}
       />
-      {text && <p className="text-xs font-medium text-slate-500 animate-pulse">{text}</p>}
+      {text && <p className="text-xs font-medium text-charcoal-muted animate-pulse">{text}</p>}
     </div>
   );
 }

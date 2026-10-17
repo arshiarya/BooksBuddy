@@ -12,11 +12,11 @@ export function PinEntry({ sessionId, verifiedAt, attemptsLeft = 3, onSuccess })
 
   if (verifiedAt) {
     return (
-      <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-center space-y-1">
-        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700">
+      <div className="p-4 rounded-xl bg-forest-50 border border-forest-200 text-forest-900 text-center space-y-1">
+        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-forest">
           <CheckCircle2 className="w-4 h-4" /> PIN Verified
         </span>
-        <p className="text-xs text-emerald-600">
+        <p className="text-xs text-forest-muted">
           You have successfully verified the 4-digit handover PIN!
         </p>
       </div>
@@ -45,24 +45,24 @@ export function PinEntry({ sessionId, verifiedAt, attemptsLeft = 3, onSuccess })
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-4 shadow-xs">
+    <div className="p-5 rounded-2xl bg-white/90 backdrop-blur-xs border border-beige-300 space-y-4 shadow-warm">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-          <KeyRound className="w-4 h-4 text-brand-600" />
+        <span className="text-xs font-bold text-forest uppercase tracking-wider flex items-center gap-2">
+          <KeyRound className="w-4 h-4 text-gold-600" />
           Enter Handover PIN
         </span>
-        <span className="text-[11px] font-medium text-slate-500">
-          Attempts remaining: <strong className="text-slate-800">{attemptsLeft}</strong>
+        <span className="text-[11px] font-medium text-charcoal-muted">
+          Attempts remaining: <strong className="text-charcoal">{attemptsLeft}</strong>
         </span>
       </div>
 
-      <p className="text-xs text-slate-600 leading-relaxed">
+      <p className="text-xs text-charcoal-muted leading-relaxed">
         Ask the current custodian for the 4-digit PIN when you meet in person to collect the book.
       </p>
 
       {error && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
-          <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-terracotta-50 border border-terracotta-200 text-terracotta-800 text-xs">
+          <ShieldAlert className="w-4 h-4 text-terracotta shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
@@ -77,7 +77,7 @@ export function PinEntry({ sessionId, verifiedAt, attemptsLeft = 3, onSuccess })
             value={pin}
             onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
             placeholder="0000"
-            className="w-44 text-center font-mono text-2xl tracking-widest px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-slate-50 font-bold"
+            className="w-44 text-center font-mono text-2xl tracking-widest px-4 py-2.5 rounded-xl border border-beige-300 focus:outline-none focus:ring-2 focus:ring-forest bg-ivory/60 font-bold text-forest shadow-inner"
             disabled={submitting || attemptsLeft <= 0}
           />
         </div>

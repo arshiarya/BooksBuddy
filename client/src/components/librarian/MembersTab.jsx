@@ -76,10 +76,10 @@ export function MembersTab({ libraryId }) {
   return (
     <div className="space-y-6">
       {/* Filters & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/90 backdrop-blur-xs p-5 rounded-2xl border border-beige-300 shadow-warm">
         <div>
-          <h4 className="text-sm font-bold text-slate-900">Library Members Directory</h4>
-          <p className="text-xs text-slate-500">
+          <h4 className="font-serif text-base font-bold text-forest">Library Members Directory</h4>
+          <p className="text-xs text-charcoal-muted mt-0.5">
             Review membership applications and assign librarian roles.
           </p>
         </div>
@@ -91,8 +91,8 @@ export function MembersTab({ libraryId }) {
               onClick={() => setFilterStatus(st)}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
                 filterStatus === st
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-forest text-ivory shadow-xs'
+                  : 'bg-ivory/80 text-charcoal-muted hover:bg-beige-200 hover:text-forest'
               }`}
             >
               {st}
@@ -111,10 +111,10 @@ export function MembersTab({ libraryId }) {
           description={`There are no members currently in ${filterStatus} status.`}
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+        <div className="bg-white/90 backdrop-blur-xs rounded-2xl border border-beige-300 overflow-hidden shadow-warm">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider text-[10px]">
+            <table className="w-full text-left text-xs text-charcoal">
+              <thead className="bg-ivory/80 text-forest font-serif font-bold border-b border-beige-300 uppercase tracking-wider text-[11px]">
                 <tr>
                   <th className="px-4 py-3">Member</th>
                   <th className="px-4 py-3">Locality / Address</th>
@@ -124,20 +124,20 @@ export function MembersTab({ libraryId }) {
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-beige-200/60">
                 {members.map((m) => {
                   const isActingOnSelf = Number(m.user_id) === Number(user?.id);
                   const isTargetPrimary = m.role === 'PRIMARY_LIBRARIAN';
                   const isBusy = actionLoadingId === m.id;
 
                   return (
-                    <tr key={m.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={m.id} className="hover:bg-ivory/40 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <p className="font-semibold text-slate-900">{m.full_name}</p>
-                        <p className="text-[11px] text-slate-500">{m.email}</p>
+                        <p className="font-semibold text-charcoal">{m.full_name}</p>
+                        <p className="text-[11px] text-charcoal-muted">{m.email}</p>
                       </td>
 
-                      <td className="px-4 py-3 whitespace-nowrap text-slate-700">
+                      <td className="px-4 py-3 whitespace-nowrap text-charcoal">
                         {m.society_locality || '—'}, {m.city || ''}
                       </td>
 
